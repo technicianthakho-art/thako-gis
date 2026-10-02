@@ -1,0 +1,1598 @@
+<!DOCTYPE html>
+<html lang="th" class="h-full">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+  <title>ระบบข้อมูลแผนที่ GIS กองช่าง อบต.ท่าก๊อ</title>
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              50: '#f5f3ff', 100: '#ede9fe', 500: '#6366f1', 600: '#4f46e5', 700: '#4338ca', 900: '#312e81',
+            }
+          },
+          fontFamily: { prompt: ['Prompt', 'sans-serif'] }
+        }
+      }
+    }
+  </script>
+
+  <!-- Google Fonts: Prompt -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+  <!-- Leaflet CSS & JS -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+  <!-- Leaflet MarkerCluster CSS & JS -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.css" />
+  <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.Default.css" />
+  <script src="https://unpkg.com/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js"></script>
+
+  <!-- Turf.js -->
+  <script src="https://cdn.jsdelivr.net/npm/@turf/turf@6/turf.min.js"></script>
+
+  <!-- Parsers -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+  <script src="https://unpkg.com/@mapbox/togeojson@0.16.0/togeojson.js"></script>
+  <script src="https://unpkg.com/shpjs@latest/dist/shp.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/proj4js/2.9.0/proj4.js"></script>
+
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <style>
+    * { box-sizing: border-box; font-family: 'Prompt', -apple-system, sans-serif; -webkit-tap-highlight-color: transparent; }
+    body, html { height: 100%; width: 100%; overflow: hidden; }
+
+    .glass-card {
+      background: rgba(255, 255, 255, 0.92);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid rgba(255, 255, 255, 0.7);
+    }
+
+    .cursor-pin { cursor: crosshair !important; }
+    .cursor-measure { cursor: cell !important; }
+    .cursor-area { cursor: precision !important; }
+
+    ::-webkit-scrollbar { width: 5px; height: 5px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+
+    .leaflet-bottom.leaflet-left {
+      display: flex !important;
+      flex-direction: column !important;
+      align-items: flex-start !important;
+      margin-bottom: 16px !important;
+      margin-left: 16px !important;
+      gap: 10px !important;
+    }
+
+    .leaflet-bottom.leaflet-left .leaflet-control-zoom {
+      margin: 0 !important;
+      border: none !important;
+      box-shadow: 0 10px 25px -5px rgba(15, 23, 42, 0.15) !important;
+      border-radius: 12px !important;
+      overflow: hidden;
+      order: 1 !important;
+    }
+    .leaflet-control-zoom a {
+      background: rgba(255, 255, 255, 0.92) !important;
+      color: #0f172a !important;
+      backdrop-filter: blur(12px);
+    }
+
+    .coords-control-box {
+      background: rgba(255, 255, 255, 0.92);
+      backdrop-filter: blur(12px);
+      padding: 6px 12px;
+      border-radius: 12px;
+      font-size: 0.72rem;
+      color: #0f172a;
+      box-shadow: 0 10px 25px -5px rgba(15, 23, 42, 0.12);
+      border: 1px solid rgba(255, 255, 255, 0.8);
+      margin: 0 !important;
+      order: 2 !important;
+    }
+
+    .user-gps-dot {
+      width: 16px; height: 16px;
+      background-color: #3b82f6;
+      border: 3px solid #ffffff;
+      border-radius: 50%;
+      box-shadow: 0 0 10px rgba(59, 130, 246, 0.6);
+      position: relative;
+    }
+    .user-gps-pulse {
+      position: absolute; top: -10px; left: -10px;
+      width: 36px; height: 36px;
+      border-radius: 50%;
+      background-color: rgba(59, 130, 246, 0.35);
+      animation: gpsPulseRing 2s infinite ease-out;
+    }
+    @keyframes gpsPulseRing { 0% { transform: scale(0.4); opacity: 1; } 100% { transform: scale(2.2); opacity: 0; } }
+
+    .custom-map-label {
+      background: rgba(255, 255, 255, 0.95);
+      border: 1px solid #4f46e5;
+      border-radius: 6px;
+      color: #1e3a8a;
+      font-weight: 600;
+      font-size: 11px;
+      padding: 3px 8px;
+    }
+
+    /* Pop-up UI แบบ Compact Horizontal / Inline Design */
+    .leaflet-popup-content-wrapper { border-radius: 18px !important; padding: 0 !important; overflow: hidden; box-shadow: 0 20px 30px -5px rgba(15, 23, 42, 0.35) !important; border: 1px solid rgba(255, 255, 255, 0.8); }
+    .leaflet-popup-content { margin: 0 !important; width: 340px !important; max-width: 85vw !important; font-size: 0.8rem; }
+    .popup-header { background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%); color: #ffffff; padding: 10px 14px; font-weight: 700; font-size: 0.85rem; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid #334155; }
+    .popup-container { max-height: 280px; overflow-y: auto; padding: 10px 12px; background: #f8fafc; }
+    
+    .prop-row { display: flex; align-items: center; justify-content: space-between; gap: 8px; background: #ffffff; border: 1px solid #e2e8f0; border-radius: 10px; padding: 7px 10px; margin-bottom: 6px; box-shadow: 0 1px 3px rgba(0,0,0,0.02); }
+    .prop-key-inline { font-weight: 700; color: #475569; font-size: 0.73rem; text-transform: uppercase; letter-spacing: 0.02em; min-width: 32%; max-width: 40%; word-break: break-word; flex-shrink: 0; }
+    .prop-val-inline { color: #0f172a; font-size: 0.8rem; font-weight: 600; text-align: right; word-break: break-word; flex: 1 1 auto; }
+    .popup-container input { width: 100%; padding: 4px 8px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 0.78rem; background: #ffffff; font-weight: 500; text-align: right; }
+    .popup-container input:focus { outline: none; border-color: #6366f1; }
+    .btn-popup-save { background: #10b981; color: white; border: none; padding: 9px; border-radius: 10px; font-size: 0.8rem; font-weight: 700; width: 100%; margin-top: 4px; cursor: pointer; transition: all 0.2s; box-shadow: 0 3px 8px rgba(16, 185, 129, 0.2); }
+    .btn-popup-save:hover { background: #059669; }
+  </style>
+</head>
+<body class="h-full overflow-hidden bg-slate-900 text-slate-800">
+
+  <!-- Loading Overlay -->
+  <div id="loading-overlay" class="fixed inset-0 bg-slate-900/60 backdrop-blur-md z-[9999] text-white flex flex-col items-center justify-center gap-3 text-sm font-semibold">
+    <div class="w-10 h-10 border-4 border-white/20 border-t-brand-500 rounded-full animate-spin"></div>
+    <span id="loading-text">⏳ กำลังโหลดระบบแผนที่...</span>
+  </div>
+
+  <!-- Map Canvas Container -->
+  <div id="map" class="w-screen h-screen bg-slate-800"></div>
+
+  <!-- Toast Notification System -->
+  <div id="toast-container" class="fixed top-20 left-1/2 -translate-x-1/2 z-[9999] pointer-events-none flex flex-col gap-2"></div>
+
+  <!-- SECTION 1: TOP HEADER NAVIGATION BAR -->
+  <div class="fixed top-4 left-4 sm:left-6 right-4 z-[1000] flex flex-wrap items-center justify-between gap-3 pointer-events-none">
+    <div class="glass-card rounded-2xl px-4 py-2 shadow-xl pointer-events-auto flex items-center gap-3">
+      <div class="p-2 bg-brand-600 text-white rounded-xl shadow-md">
+        <i data-lucide="map-pin" class="w-4 h-4"></i>
+      </div>
+      <h1 id="gis-title" class="font-bold text-slate-900 text-sm sm:text-base leading-none">📍 GIS กองช่าง อบต.ท่าก๊อ</h1>
+    </div>
+
+    <div class="glass-card rounded-2xl p-1.5 shadow-xl pointer-events-auto flex items-center gap-2 flex-wrap">
+      <button id="btn-header-highway" onclick="openHighwayApp()" class="py-1.5 px-3 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold shadow-md transition flex items-center gap-1.5" title="เปิดฐานข้อมูลทางหลวงท้องถิ่น">
+        <i data-lucide="map" class="w-4 h-4"></i>
+        <span>🛣️ ทางหลวงท้องถิ่น</span>
+      </button>
+
+      <button id="btn-header-convert" class="py-1.5 px-3 bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 text-white rounded-xl text-xs font-bold shadow-md transition flex items-center gap-1.5" title="แปลงค่าพิกัด">
+        <i data-lucide="repeat" class="w-4 h-4"></i>
+        <span>🔄 แปลงพิกัด</span>
+      </button>
+
+      <button id="btn-header-locate" class="p-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-semibold transition" title="ตำแหน่งปัจจุบัน (GPS)">
+        <i data-lucide="crosshair" class="w-4 h-4 text-brand-600"></i>
+      </button>
+
+      <label id="upload-label" class="py-1.5 px-3 bg-slate-200 text-slate-400 rounded-xl text-xs font-semibold cursor-not-allowed transition flex items-center gap-1" title="ต้องเข้าสู่ระบบ Admin ก่อนอัปโหลด">
+        <i data-lucide="upload-cloud" class="w-4 h-4"></i>
+        <span class="hidden sm:inline">อัปโหลด</span>
+        <input type="file" id="file-input" accept=".geojson, .json, .kml, .kmz, .zip" disabled class="hidden" />
+      </label>
+
+      <button id="btn-toggle-sidebar" class="py-1.5 px-3 bg-slate-900 text-white rounded-xl hover:bg-slate-800 transition shadow-md flex items-center gap-1.5 text-xs font-semibold" title="เปิด/ปิด รายการชั้นข้อมูล">
+        <i data-lucide="layers" class="w-4 h-4"></i>
+        <span>รายการชั้นข้อมูล</span>
+      </button>
+
+      <button id="btn-login" class="py-1.5 px-3 bg-slate-900 hover:bg-slate-800 text-white rounded-xl text-xs font-semibold shadow-md transition flex items-center gap-1">
+        <i data-lucide="key" class="w-4 h-4"></i>
+        <span id="login-text">Admin</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- SECTION 2: RIGHT ACTION TOOLBAR -->
+  <div class="fixed top-20 right-4 z-[1000] flex flex-col gap-2 pointer-events-auto">
+    <div class="glass-card rounded-2xl p-1.5 shadow-xl flex flex-col gap-1.5">
+      <button id="btn-tool-coord" class="p-2.5 text-slate-700 hover:bg-white hover:text-brand-600 rounded-xl transition flex items-center justify-center" title="ปักพิกัดตำแหน่ง">
+        <i data-lucide="map-pin" class="w-5 h-5"></i>
+      </button>
+      <button id="btn-tool-measure" class="p-2.5 text-slate-700 hover:bg-white hover:text-brand-600 rounded-xl transition flex items-center justify-center" title="วัดระยะทาง">
+        <i data-lucide="ruler" class="w-5 h-5"></i>
+      </button>
+      <button id="btn-tool-area" class="p-2.5 text-slate-700 hover:bg-white hover:text-brand-600 rounded-xl transition flex items-center justify-center" title="คำนวณพื้นที่">
+        <i data-lucide="pentagon" class="w-5 h-5"></i>
+      </button>
+      <button id="btn-tool-export" class="p-2.5 text-emerald-600 hover:bg-emerald-50 rounded-xl transition flex items-center justify-center" title="ดาวน์โหลด GeoJSON">
+        <i data-lucide="download" class="w-5 h-5"></i>
+      </button>
+      <button id="btn-tool-save-layer" class="p-2.5 text-indigo-600 hover:bg-indigo-50 rounded-xl transition flex items-center justify-center" title="จัดเก็บลง Google Drive">
+        <i data-lucide="save" class="w-5 h-5"></i>
+      </button>
+      <button id="btn-tool-clear" class="p-2.5 text-red-500 hover:bg-red-50 rounded-xl transition flex items-center justify-center" title="ล้างหมุด/รูปวาดชั่วคราว">
+        <i data-lucide="trash-2" class="w-5 h-5"></i>
+      </button>
+    </div>
+  </div>
+
+  <!-- SECTION 3: SIDEBAR LAYER DRAWER -->
+  <aside id="sidebar" class="fixed top-0 right-0 h-full w-[340px] max-w-[85vw] bg-white/95 backdrop-blur-xl z-[1005] shadow-2xl border-l border-slate-200/80 translate-x-full transition-transform duration-300 flex flex-col">
+    <div class="p-4 border-b border-slate-200 flex items-center justify-between font-bold text-slate-900 text-sm">
+      <span class="flex items-center gap-2"><i data-lucide="layers" class="w-4 h-4 text-brand-600"></i> รายการชั้นข้อมูล</span>
+      <button id="btn-close-sidebar" class="p-1.5 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-lg"><i data-lucide="x" class="w-5 h-5"></i></button>
+    </div>
+    
+    <div class="flex-1 overflow-y-auto p-4 space-y-4">
+      <div>
+        <div class="text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-2">Google Drive Layers</div>
+        <div id="uploaded-layers-list" class="space-y-2"></div>
+      </div>
+
+      <div class="pt-4 border-t border-slate-200">
+        <div class="text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-2">🗺️ แผนที่ฐาน (Base Maps)</div>
+        <div class="space-y-1.5 text-xs text-slate-700 font-medium">
+          <label class="flex items-center gap-2 p-2 hover:bg-slate-100 rounded-xl cursor-pointer">
+            <input type="radio" name="basemap" value="googleHybrid" checked class="accent-brand-600"> Google Earth (Hybrid)
+          </label>
+          <label class="flex items-center gap-2 p-2 hover:bg-slate-100 rounded-xl cursor-pointer">
+            <input type="radio" name="basemap" value="googleSatellite" class="accent-brand-600"> Google Earth (Satellite)
+          </label>
+          <label class="flex items-center gap-2 p-2 hover:bg-slate-100 rounded-xl cursor-pointer">
+            <input type="radio" name="basemap" value="osm" class="accent-brand-600"> OpenStreetMap
+          </label>
+        </div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- SECTION 4: BOTTOM FLOATING DOCK -->
+  <div id="bottom-tool-dock" class="fixed bottom-6 left-1/2 -translate-x-1/2 z-[1000] pointer-events-auto hidden transition-all duration-300">
+    <div class="glass-card rounded-3xl p-4 shadow-2xl border border-white/80 max-w-md w-[90vw] sm:w-[420px] flex flex-col gap-2 text-xs">
+      <div class="flex items-center justify-between font-bold text-slate-800 border-b border-slate-200/60 pb-2">
+        <span id="dock-title" class="flex items-center gap-1.5 text-brand-600">🛠️ เครื่องมือคำนวณ/แสดงผล</span>
+        <div class="flex items-center gap-2">
+          <button id="btn-dock-undo" class="px-2 py-1 bg-amber-50 text-amber-700 hover:bg-amber-100 border border-amber-200 rounded-lg text-[11px] font-bold flex items-center gap-1 transition" title="ย้อนกลับรายการล่าสุด">
+            <i data-lucide="undo-2" class="w-3.5 h-3.5"></i> ย้อนกลับ
+          </button>
+          <button id="btn-dock-close" class="text-slate-400 hover:text-slate-600"><i data-lucide="x" class="w-4 h-4"></i></button>
+        </div>
+      </div>
+      <div id="dock-content" class="text-slate-600 font-medium leading-relaxed">
+        คลิกบนแผนที่เพื่อเริ่มปักจุด...
+      </div>
+    </div>
+  </div>
+
+  <!-- SECTION 5: MODALS -->
+  <div id="modal-convert" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-[9000] flex items-center justify-center p-4 hidden">
+    <div class="glass-card rounded-3xl p-5 w-full max-w-sm shadow-2xl space-y-3 border border-white/80 text-xs">
+      <div class="flex items-center justify-between font-bold text-slate-900 text-sm border-b pb-2">
+        <span class="flex items-center gap-2"><i data-lucide="repeat" class="w-4 h-4 text-brand-600"></i> แปลงค่าพิกัด GIS</span>
+        <button id="close-modal-convert" class="text-slate-400 hover:text-slate-600"><i data-lucide="x" class="w-5 h-5"></i></button>
+      </div>
+
+      <div class="space-y-1">
+        <label class="font-semibold text-slate-600">โหมดแปลงพิกัด</label>
+        <select id="convert-mode" class="w-full p-2 bg-white border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-brand-500">
+          <option value="latlon2utm">Latitude/Longitude ➔ UTM</option>
+          <option value="utm2latlon">UTM ➔ Latitude/Longitude</option>
+        </select>
+      </div>
+
+      <div id="conv-latlon-inputs" class="space-y-2">
+        <div>
+          <label class="font-semibold text-slate-600">Lat (ละติจูด)</label>
+          <input type="number" step="any" id="conv-lat" placeholder="เช่น 13.7563" class="w-full p-2 bg-white border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-brand-500" />
+        </div>
+        <div>
+          <label class="font-semibold text-slate-600">Lon (ลองจิจูด)</label>
+          <input type="number" step="any" id="conv-lon" placeholder="เช่น 100.5018" class="w-full p-2 bg-white border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-brand-500" />
+        </div>
+      </div>
+
+      <div id="conv-utm-inputs" class="space-y-2 hidden">
+        <div>
+          <label class="font-semibold text-slate-600">Zone UTM</label>
+          <select id="conv-utm-zone" class="w-full p-2 bg-white border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-brand-500">
+            <option value="32647">Zone 47N (ประเทศไทยฝั่งตะวันตก/กลาง)</option>
+            <option value="32648">Zone 48N (ประเทศไทยฝั่งตะวันออก/อีสาน)</option>
+          </select>
+        </div>
+        <div>
+          <label class="font-semibold text-slate-600">Easting (E)</label>
+          <input type="number" step="any" id="conv-e" placeholder="เช่น 662580" class="w-full p-2 bg-white border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-brand-500" />
+        </div>
+        <div>
+          <label class="font-semibold text-slate-600">Northing (N)</label>
+          <input type="number" step="any" id="conv-n" placeholder="เช่น 1521500" class="w-full p-2 bg-white border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-brand-500" />
+        </div>
+      </div>
+
+      <button id="btn-exec-convert" class="w-full py-2 bg-brand-600 hover:bg-brand-700 text-white rounded-xl font-bold shadow-md transition">คำนวณแปลงพิกัด</button>
+
+      <div id="convert-result-box" class="p-3 bg-slate-50 border border-slate-200 rounded-xl space-y-2 hidden">
+        <div class="font-bold text-slate-800">ผลลัพธ์การแปลง:</div>
+        <div id="convert-result-text" class="text-slate-600 leading-relaxed"></div>
+        <div class="flex gap-2 pt-1">
+          <button id="btn-copy-conv" class="flex-1 py-1.5 bg-slate-200 hover:bg-slate-300 text-slate-800 rounded-lg font-semibold transition">คัดลอก</button>
+          <button id="btn-fly-conv" class="flex-1 py-1.5 bg-brand-600 hover:bg-brand-700 text-white rounded-lg font-semibold transition">บินไปตำแหน่งนี้</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="modal-pin-coord" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-[9000] flex items-center justify-center p-4 hidden">
+    <div class="glass-card rounded-3xl p-5 w-full max-w-sm shadow-2xl space-y-3 border border-white/80 text-xs">
+      <div class="flex items-center justify-between font-bold text-slate-900 text-sm border-b pb-2">
+        <span class="flex items-center gap-2"><i data-lucide="map-pin" class="w-4 h-4 text-brand-600"></i> ค้นหาและจดบันทึกพิกัด</span>
+        <button id="close-modal-pin" class="text-slate-400 hover:text-slate-600"><i data-lucide="x" class="w-5 h-5"></i></button>
+      </div>
+
+      <button id="btn-toggle-click-map" class="w-full py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-800 rounded-xl font-bold transition flex items-center justify-center gap-2 border border-slate-200">
+        <span>👆 คลิกบนแผนที่เพื่อปักหมุด</span>
+      </button>
+
+      <div class="space-y-1">
+        <label class="font-semibold text-slate-600">ระบบพิกัด</label>
+        <select id="pin-coord-type" class="w-full p-2 bg-white border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-brand-500">
+          <option value="latlon">Latitude, Longitude (EPSG:4326)</option>
+          <option value="utm47">UTM Zone 47N (EPSG:32647)</option>
+          <option value="utm48">UTM Zone 48N (EPSG:32648)</option>
+        </select>
+      </div>
+
+      <div id="pin-latlon-inputs" class="space-y-2">
+        <div>
+          <label class="font-semibold text-slate-600">Latitude (ละติจูด)</label>
+          <input type="number" step="any" id="inp-pin-lat" placeholder="เช่น 13.7563" class="w-full p-2 bg-white border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-brand-500" />
+        </div>
+        <div>
+          <label class="font-semibold text-slate-600">Longitude (ลองจิจูด)</label>
+          <input type="number" step="any" id="inp-pin-lon" placeholder="เช่น 100.5018" class="w-full p-2 bg-white border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-brand-500" />
+        </div>
+      </div>
+
+      <div id="pin-utm-inputs" class="space-y-2 hidden">
+        <div>
+          <label class="font-semibold text-slate-600">Easting (E / พิกัดตะวันออก)</label>
+          <input type="number" step="any" id="inp-pin-utm-e" placeholder="เช่น 662580" class="w-full p-2 bg-white border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-brand-500" />
+        </div>
+        <div>
+          <label class="font-semibold text-slate-600">Northing (N / พิกัดเหนือ)</label>
+          <input type="number" step="any" id="inp-pin-utm-n" placeholder="เช่น 1521500" class="w-full p-2 bg-white border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-brand-500" />
+        </div>
+      </div>
+
+      <div>
+        <label class="font-semibold text-slate-600">ชื่อจุด / หมายเหตุ</label>
+        <input type="text" id="inp-pin-name" placeholder="เช่น จุดตรวจที่ 1" class="w-full p-2 bg-white border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-brand-500" />
+      </div>
+
+      <button id="btn-submit-pin" class="w-full py-2.5 bg-brand-600 hover:bg-brand-700 text-white rounded-xl font-bold shadow-md transition">ปักหมุดพิกัดนี้</button>
+    </div>
+  </div>
+
+  <!-- SECTION 6: ADMIN LOGIN MODAL -->
+  <div id="modal-admin-login" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-[9000] flex items-center justify-center p-4 hidden">
+    <div class="glass-card rounded-3xl p-6 w-full max-w-sm shadow-2xl space-y-4 border border-white/80">
+      <div class="flex items-center justify-between font-bold text-slate-900 text-sm border-b pb-2">
+        <span class="flex items-center gap-2"><i data-lucide="key" class="w-4 h-4 text-brand-600"></i> เข้าสู่ระบบ Admin</span>
+        <button id="close-modal-login" class="text-slate-400 hover:text-slate-600"><i data-lucide="x" class="w-5 h-5"></i></button>
+      </div>
+      <div class="space-y-3">
+        <div>
+          <label class="block text-xs font-semibold text-slate-600 mb-1">รหัสผ่านระบบ</label>
+          <input type="password" id="admin-pass-input" placeholder="กรอกรหัสผ่าน Admin..." class="w-full p-2.5 bg-white border border-slate-200 rounded-xl text-xs outline-none focus:ring-2 focus:ring-brand-500" />
+        </div>
+        <button id="btn-submit-login" class="w-full py-2.5 bg-brand-600 hover:bg-brand-700 text-white rounded-xl text-xs font-bold shadow-md transition">เข้าสู่ระบบ</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- SECTION 7: JAVASCRIPT LOGIC ENGINE -->
+  <script>
+    // URL ของ REST API บน Google Apps Script
+    const API_URL = "https://script.google.com/macros/s/AKfycbyz6Am3mNYcM_LqgTBo7bOMyXuN9cAC3vbbcILLjHhxwBx3_vWP2Xdk5V5IFRrXYlhlow/exec";
+
+    // REST API Wrapper
+    async function apiFetch(params, method = 'GET', bodyData = null) {
+      let url = API_URL;
+      if (method === 'GET' && params) {
+        const query = new URLSearchParams(params).toString();
+        url += '?' + query;
+      }
+
+      const options = { method: method };
+      if (method === 'POST' && bodyData) {
+        options.body = JSON.stringify(bodyData);
+      }
+
+      const response = await fetch(url, options);
+      return await response.json();
+    }
+
+    const HIGHWAY_APP_BASE_URL = "https://script.google.com/macros/s/AKfycbyv1XpHjf3bgPS0DRWOLxfcj_gl6xji6Ve87KwgTQ4mfCnRCeil7e7OsYi3r5oc5J5c1w/exec";
+
+    function openHighwayApp(roadCode = '') {
+      let targetUrl = HIGHWAY_APP_BASE_URL;
+      if (roadCode) {
+        targetUrl += `?code=${encodeURIComponent(roadCode)}&action=drive`;
+      }
+      window.open(targetUrl, '_blank');
+    }
+
+    lucide.createIcons();
+
+    proj4.defs("EPSG:32647", "+proj=utm +zone=47 +datum=WGS84 +units=m +no_defs");
+    proj4.defs("EPSG:32648", "+proj=utm +zone=48 +datum=WGS84 +units=m +no_defs");
+
+    let isAdminLoggedIn = false;
+    let adminToken = sessionStorage.getItem('adminToken') || null;
+    if (adminToken) isAdminLoggedIn = true;
+
+    let currentHighlightedFeature = null;
+    let activeToolMode = null;
+    let isClickPinEnabled = false;
+
+    let activePoints = [];
+    let vertexMarkers = [];
+    let activeLine = null;
+    let activePolygon = null;
+    let rubberGuideLine = null;
+
+    function showToast(msg, type = 'info') {
+      const box = document.getElementById('toast-container');
+      const toast = document.createElement('div');
+      const bg = type === 'success' ? 'bg-emerald-600' : type === 'error' ? 'bg-red-600' : 'bg-slate-900';
+      toast.className = `glass-card ${bg} text-white text-xs font-semibold px-4 py-2.5 rounded-2xl shadow-xl pointer-events-auto transition-all duration-300 transform translate-y-2 opacity-0`;
+      toast.textContent = msg;
+      box.appendChild(toast);
+      setTimeout(() => { toast.classList.remove('translate-y-2', 'opacity-0'); }, 10);
+      setTimeout(() => {
+        toast.classList.add('opacity-0', '-translate-y-2');
+        setTimeout(() => toast.remove(), 300);
+      }, 3000);
+    }
+
+    const sidebar = document.getElementById('sidebar');
+    document.getElementById('btn-toggle-sidebar').addEventListener('click', () => {
+      sidebar.classList.toggle('translate-x-full');
+      setTimeout(() => map.invalidateSize(), 300);
+    });
+    document.getElementById('btn-close-sidebar').addEventListener('click', () => sidebar.classList.add('translate-x-full'));
+
+    const btnLogin = document.getElementById('btn-login');
+    const loginText = document.getElementById('login-text');
+    const uploadLabel = document.getElementById('upload-label');
+    const fileInput = document.getElementById('file-input');
+    const modalLogin = document.getElementById('modal-admin-login');
+
+    function applyAdminState() {
+      if (isAdminLoggedIn) {
+        loginText.textContent = 'Log out';
+        btnLogin.className = 'py-1.5 px-3 bg-red-600 hover:bg-red-700 text-white rounded-xl text-xs font-semibold shadow-md transition flex items-center gap-1';
+        uploadLabel.className = 'py-1.5 px-3 bg-brand-600 hover:bg-brand-700 text-white rounded-xl text-xs font-semibold shadow-md cursor-pointer transition flex items-center gap-1';
+        fileInput.disabled = false;
+      } else {
+        loginText.textContent = 'Admin';
+        btnLogin.className = 'py-1.5 px-3 bg-slate-900 hover:bg-slate-800 text-white rounded-xl text-xs font-semibold shadow-md transition flex items-center gap-1';
+        uploadLabel.className = 'py-1.5 px-3 bg-slate-200 text-slate-400 rounded-xl text-xs font-semibold cursor-not-allowed transition flex items-center gap-1';
+        fileInput.disabled = true;
+      }
+      refreshUIState();
+    }
+
+    btnLogin.addEventListener('click', () => {
+      if (!isAdminLoggedIn) {
+        modalLogin.classList.remove('hidden');
+        document.getElementById('admin-pass-input').focus();
+      } else {
+        isAdminLoggedIn = false;
+        adminToken = null;
+        sessionStorage.removeItem('adminToken');
+        applyAdminState();
+        showToast('ออกจากระบบ Admin เรียบร้อยแล้ว', 'info');
+      }
+    });
+
+    document.getElementById('close-modal-login').addEventListener('click', () => modalLogin.classList.add('hidden'));
+
+    document.getElementById('btn-submit-login').addEventListener('click', async () => {
+      const pwd = document.getElementById('admin-pass-input').value;
+      if (!pwd) { showToast('กรุณากรอกรหัสผ่าน', 'error'); return; }
+
+      document.getElementById('loading-overlay').style.display = 'flex';
+      try {
+        const res = await apiFetch(null, 'POST', { action: 'login', password: pwd });
+        document.getElementById('loading-overlay').style.display = 'none';
+
+        if (res.success) {
+          isAdminLoggedIn = true;
+          adminToken = res.token;
+          sessionStorage.setItem('adminToken', adminToken);
+          applyAdminState();
+          modalLogin.classList.add('hidden');
+          document.getElementById('admin-pass-input').value = '';
+          showToast('เข้าสู่ระบบสิทธิ์ Admin เรียบร้อยแล้ว', 'success');
+        } else {
+          showToast(res.error || 'รหัสผ่านไม่ถูกต้อง!', 'error');
+        }
+      } catch (err) {
+        document.getElementById('loading-overlay').style.display = 'none';
+        showToast('เชื่อมต่อ Server ไม่สำเร็จ: ' + err.message, 'error');
+      }
+    });
+
+    function refreshUIState() {
+      document.querySelectorAll('.admin-only').forEach(el => {
+        el.style.display = isAdminLoggedIn ? 'inline-block' : 'none';
+      });
+    }
+
+    const CONFIG = {
+      studyArea: { center: [13.7563, 100.5018], zoom: 12 },
+      baseLayers: {
+        osm: L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19, attribution: '&copy; OpenStreetMap' }),
+        googleSatellite: L.tileLayer('https://mt1.google.com/vt/lyrs=s&x={x}&y={y}&z={z}', { maxZoom: 20, attribution: '&copy; Google' }),
+        googleHybrid: L.tileLayer('https://mt1.google.com/vt/lyrs=y&x={x}&y={y}&z={z}', { maxZoom: 20, attribution: '&copy; Google' })
+      }
+    };
+
+    const map = L.map('map', { center: CONFIG.studyArea.center, zoom: CONFIG.studyArea.zoom, zoomControl: false });
+    L.control.zoom({ position: 'bottomleft' }).addTo(map);
+
+    let activeBaseMap = CONFIG.baseLayers.googleHybrid.addTo(map);
+
+    document.querySelectorAll('input[name="basemap"]').forEach(radio => {
+      radio.addEventListener('change', (e) => {
+        map.removeLayer(activeBaseMap);
+        activeBaseMap = CONFIG.baseLayers[e.target.value];
+        map.addLayer(activeBaseMap);
+      });
+    });
+
+    const tempDrawingGroup = L.featureGroup().addTo(map);
+
+    const coordsControl = L.control({ position: 'bottomleft' });
+    coordsControl.onAdd = function () {
+      const div = L.DomUtil.create('div', 'coords-control-box');
+      div.id = 'coords-box';
+      div.innerHTML = 'Lat: - | Lon: - <br>UTM: -';
+      return div;
+    };
+    coordsControl.addTo(map);
+
+    map.on('mousemove', (e) => {
+      const lat = e.latlng.lat;
+      const lon = e.latlng.lng;
+      const zone = lon >= 102 ? 48 : 47;
+      const utm = proj4("EPSG:4326", "EPSG:326" + zone, [lon, lat]);
+
+      document.getElementById('coords-box').innerHTML = 
+        `<b>Lat:</b> ${lat.toFixed(6)} | <b>Lon:</b> ${lon.toFixed(6)}<br>` +
+        `<b>UTM Zone ${zone}N:</b> E ${Math.round(utm[0]).toLocaleString()} m, N ${Math.round(utm[1]).toLocaleString()} m`;
+
+      if ((activeToolMode === 'measure' || activeToolMode === 'area') && activePoints.length > 0) {
+        const lastPt = activePoints[activePoints.length - 1];
+        const currentMouseLatLng = [lat, lon];
+
+        if (!rubberGuideLine) {
+          rubberGuideLine = L.polyline([[lastPt[1], lastPt[0]], currentMouseLatLng], {
+            color: '#6366f1', weight: 2, dashArray: '4, 4', opacity: 0.8
+          }).addTo(map);
+        } else {
+          rubberGuideLine.setLatLngs([[lastPt[1], lastPt[0]], currentMouseLatLng]);
+        }
+      }
+    });
+
+    let userLocationMarker = null;
+    let userAccuracyCircle = null;
+
+    function locateUser() {
+      if (!navigator.geolocation) {
+        showToast('เบราว์เซอร์ไม่รองรับ GPS', 'error');
+        return;
+      }
+
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          const { latitude, longitude, accuracy } = position.coords;
+          if (userLocationMarker) map.removeLayer(userLocationMarker);
+          if (userAccuracyCircle) map.removeLayer(userAccuracyCircle);
+
+          const zone = longitude >= 102 ? 48 : 47;
+          const utm = proj4("EPSG:4326", "EPSG:326" + zone, [longitude, latitude]);
+
+          const userIcon = L.divIcon({
+            className: 'user-gps-custom-icon',
+            html: '<div class="user-gps-dot"><div class="user-gps-pulse"></div></div>',
+            iconSize: [16, 16],
+            iconAnchor: [8, 8]
+          });
+
+          userLocationMarker = L.marker([latitude, longitude], { icon: userIcon }).addTo(map);
+          userAccuracyCircle = L.circle([latitude, longitude], {
+            radius: accuracy, color: '#3b82f6', fillColor: '#60a5fa', fillOpacity: 0.15, weight: 1
+          }).addTo(map);
+
+          userLocationMarker.bindPopup(`
+            <div style="font-size:0.82rem; line-height:1.6; padding: 2px;">
+              <b style="color:#2563eb; font-size:0.88rem;">📍 ตำแหน่งปัจจุบันของคุณ</b><br>
+              <b>Lat:</b> ${latitude.toFixed(6)}<br>
+              <b>Lon:</b> ${longitude.toFixed(6)}<br>
+              <b>UTM Zone ${zone}N:</b><br>
+              • Easting (E): ${Math.round(utm[0]).toLocaleString()} m<br>
+              • Northing (N): ${Math.round(utm[1]).toLocaleString()} m<br>
+              <span style="color:#64748b; font-size:0.75rem;">ความแม่นยำ: ±${Math.round(accuracy).toLocaleString()} เมตร</span>
+            </div>
+          `, { autoPan: true, autoPanPaddingTopLeft: [50, 150], autoPanPaddingBottomRight: [50, 50] }).openPopup();
+
+          map.flyTo([latitude, longitude], 17, { animate: true, duration: 1.5 });
+          showToast('ระบุตำแหน่ง GPS เรียบร้อยแล้ว', 'success');
+        },
+        (err) => showToast('ไม่สามารถดึงตำแหน่ง GPS ได้: ' + err.message, 'error'),
+        { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+      );
+    }
+
+    document.getElementById('btn-header-locate').addEventListener('click', locateUser);
+
+    const modalConvert = document.getElementById('modal-convert');
+    const convertMode = document.getElementById('convert-mode');
+    const convLatLonInputs = document.getElementById('conv-latlon-inputs');
+    const convUtmInputs = document.getElementById('conv-utm-inputs');
+    const convertResultBox = document.getElementById('convert-result-box');
+    const convertResultText = document.getElementById('convert-result-text');
+    let convertedLatLon = null;
+
+    document.getElementById('btn-header-convert').addEventListener('click', () => modalConvert.classList.remove('hidden'));
+    document.getElementById('close-modal-convert').addEventListener('click', () => modalConvert.classList.add('hidden'));
+
+    convertMode.addEventListener('change', (e) => {
+      if (e.target.value === 'latlon2utm') {
+        convLatLonInputs.classList.remove('hidden');
+        convUtmInputs.classList.add('hidden');
+      } else {
+        convLatLonInputs.classList.add('hidden');
+        convUtmInputs.classList.remove('hidden');
+      }
+      convertResultBox.classList.add('hidden');
+    });
+
+    document.getElementById('btn-exec-convert').addEventListener('click', () => {
+      const mode = convertMode.value;
+      if (mode === 'latlon2utm') {
+        const lat = parseFloat(document.getElementById('conv-lat').value);
+        const lon = parseFloat(document.getElementById('conv-lon').value);
+        if (isNaN(lat) || isNaN(lon)) { showToast('กรุณากรอกค่า Lat/Lon ให้ถูกต้อง', 'error'); return; }
+        
+        const zone = lon >= 102 ? 48 : 47;
+        const utm = proj4("EPSG:4326", "EPSG:326" + zone, [lon, lat]);
+        convertedLatLon = { lat, lon };
+
+        convertResultText.innerHTML = `
+          <b>UTM Zone ${zone}N:</b><br>
+          • Easting (E): ${Math.round(utm[0]).toLocaleString()} m<br>
+          • Northing (N): ${Math.round(utm[1]).toLocaleString()} m
+        `;
+      } else {
+        const epsg = document.getElementById('conv-utm-zone').value;
+        const zone = epsg === '32647' ? 47 : 48;
+        const e = parseFloat(document.getElementById('conv-e').value);
+        const n = parseFloat(document.getElementById('conv-n').value);
+        if (isNaN(e) || isNaN(n)) { showToast('กรุณากรอกค่า Easting/Northing ให้ถูกต้อง', 'error'); return; }
+
+        const res = proj4("EPSG:" + epsg, "EPSG:4326", [e, n]);
+        convertedLatLon = { lat: res[1], lon: res[0] };
+
+        convertResultText.innerHTML = `
+          <b>Lat/Lon (EPSG:4326):</b><br>
+          • Latitude: ${res[1].toFixed(6)}<br>
+          • Longitude: ${res[0].toFixed(6)}
+        `;
+      }
+      convertResultBox.classList.remove('hidden');
+    });
+
+    document.getElementById('btn-copy-conv').addEventListener('click', () => {
+      if (convertResultText.innerText) {
+        navigator.clipboard.writeText(convertResultText.innerText);
+        showToast('คัดลอกค่าผลลัพธ์พิกัดเรียบร้อยแล้ว', 'success');
+      }
+    });
+
+    document.getElementById('btn-fly-conv').addEventListener('click', () => {
+      if (convertedLatLon) {
+        createPointMarker(convertedLatLon.lat, convertedLatLon.lon, 'จุดแปลงพิกัด');
+        map.setView([convertedLatLon.lat, convertedLatLon.lon], 16);
+        modalConvert.classList.add('hidden');
+      }
+    });
+
+    const modalPin = document.getElementById('modal-pin-coord');
+    const selectPinCoordType = document.getElementById('pin-coord-type');
+    const pinLatLonInputs = document.getElementById('pin-latlon-inputs');
+    const pinUtmInputs = document.getElementById('pin-utm-inputs');
+    const btnToggleClickMap = document.getElementById('btn-toggle-click-map');
+
+    document.getElementById('btn-tool-coord').addEventListener('click', () => {
+      modalPin.classList.remove('hidden');
+      setToolMode('pin');
+    });
+    document.getElementById('close-modal-pin').addEventListener('click', () => modalPin.classList.add('hidden'));
+
+    selectPinCoordType.addEventListener('change', (e) => {
+      if (e.target.value === 'latlon') {
+        pinLatLonInputs.classList.remove('hidden');
+        pinUtmInputs.classList.add('hidden');
+      } else {
+        pinLatLonInputs.classList.add('hidden');
+        pinUtmInputs.classList.remove('hidden');
+      }
+    });
+
+    btnToggleClickMap.addEventListener('click', () => {
+      isClickPinEnabled = !isClickPinEnabled;
+      if (isClickPinEnabled) {
+        btnToggleClickMap.className = 'w-full py-2.5 bg-orange-500 hover:bg-orange-600 text-white rounded-xl font-bold transition flex items-center justify-center gap-2 shadow-md';
+        btnToggleClickMap.innerHTML = '<span>📍 พร้อมคลิกปักหมุดบนแผนที่...</span>';
+        map.getContainer().classList.add('cursor-pin');
+        modalPin.classList.add('hidden');
+        showToast('คลิกบนแผนที่เพื่อปักหมุดตำแหน่งได้ทันที', 'info');
+      } else {
+        btnToggleClickMap.className = 'w-full py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-800 rounded-xl font-bold transition flex items-center justify-center gap-2 border border-slate-200';
+        btnToggleClickMap.innerHTML = '<span>👆 คลิกบนแผนที่เพื่อปักหมุด</span>';
+        map.getContainer().classList.remove('cursor-pin');
+      }
+    });
+
+    document.getElementById('btn-submit-pin').addEventListener('click', () => {
+      const type = selectPinCoordType.value;
+      const name = document.getElementById('inp-pin-name').value || 'จุดพิกัดจดบันทึก';
+      let lat, lon;
+
+      if (type === 'latlon') {
+        lat = parseFloat(document.getElementById('inp-pin-lat').value);
+        lon = parseFloat(document.getElementById('inp-pin-lon').value);
+      } else {
+        const easting = parseFloat(document.getElementById('inp-pin-utm-e').value);
+        const northing = parseFloat(document.getElementById('inp-pin-utm-n').value);
+        const epsg = type === 'utm47' ? 'EPSG:32647' : 'EPSG:32648';
+        if (!isNaN(easting) && !isNaN(northing)) {
+          const res = proj4(epsg, "EPSG:4326", [easting, northing]);
+          lon = res[0]; lat = res[1];
+        }
+      }
+
+      if (isNaN(lat) || isNaN(lon)) {
+        showToast('กรุณากรอกค่าพิกัดให้ถูกต้อง', 'error');
+        return;
+      }
+
+      createPointMarker(lat, lon, name);
+      map.setView([lat, lon], 16);
+      modalPin.classList.add('hidden');
+    });
+
+    document.getElementById('btn-tool-measure').addEventListener('click', () => setToolMode('measure'));
+    document.getElementById('btn-tool-area').addEventListener('click', () => setToolMode('area'));
+    document.getElementById('btn-dock-close').addEventListener('click', () => setToolMode(null));
+
+    function setToolMode(mode) {
+      activeToolMode = mode;
+      clearTempDrawingSession();
+
+      const dock = document.getElementById('bottom-tool-dock');
+      const title = document.getElementById('dock-title');
+      const content = document.getElementById('dock-content');
+      const mapContainer = map.getContainer();
+
+      mapContainer.classList.remove('cursor-pin', 'cursor-measure', 'cursor-area');
+
+      if (mode === 'pin') {
+        dock.classList.remove('hidden');
+        title.innerHTML = '📍 ค้นหาและจดบันทึกพิกัด';
+        content.innerHTML = '<b>สถานะ:</b> พร้อมปักหมุดพิกัดตำแหน่ง...';
+        mapContainer.classList.add('cursor-pin');
+      } else if (mode === 'measure') {
+        dock.classList.remove('hidden');
+        title.innerHTML = '📏 วัดระยะทาง';
+        content.innerHTML = '<b>ระยะทางรวม:</b> 0.00 เมตร (0.000 กม.)';
+        mapContainer.classList.add('cursor-measure');
+      } else if (mode === 'area') {
+        dock.classList.remove('hidden');
+        title.innerHTML = '📐 คำนวณพื้นที่';
+        content.innerHTML = '<b>พื้นที่รวม:</b> 0 ตร.ม. (0 ไร่ 0 งาน 0 ตร.วา)';
+        mapContainer.classList.add('cursor-area');
+      } else {
+        dock.classList.add('hidden');
+        isClickPinEnabled = false;
+      }
+    }
+
+    function clearTempDrawingSession() {
+      activePoints = [];
+      vertexMarkers.forEach(m => map.removeLayer(m));
+      vertexMarkers = [];
+      if (activeLine) { map.removeLayer(activeLine); activeLine = null; }
+      if (activePolygon) { map.removeLayer(activePolygon); activePolygon = null; }
+      if (rubberGuideLine) { map.removeLayer(rubberGuideLine); rubberGuideLine = null; }
+    }
+
+    document.getElementById('btn-dock-undo').addEventListener('click', () => {
+      if (activePoints.length > 0) {
+        activePoints.pop();
+        const lastMarker = vertexMarkers.pop();
+        if (lastMarker) map.removeLayer(lastMarker);
+        recalculateShape();
+        showToast('ย้อนกลับจุดล่าสุดเรียบร้อยแล้ว', 'info');
+      }
+    });
+
+    function createPointMarker(lat, lon, name) {
+      const zone = lon >= 102 ? 48 : 47;
+      const utm = proj4("EPSG:4326", "EPSG:326" + zone, [lon, lat]);
+
+      const marker = L.marker([lat, lon], { title: name });
+      const popupContent = `
+        <div style="font-size:0.8rem; line-height:1.5;">
+          <b style="color:#4f46e5;">📍 ${name}</b><br>
+          <b>Lat:</b> ${lat.toFixed(6)} | <b>Lon:</b> ${lon.toFixed(6)}<br>
+          <b>UTM Zone ${zone}N:</b> E ${Math.round(utm[0]).toLocaleString()} m, N ${Math.round(utm[1]).toLocaleString()} m
+        </div>
+      `;
+      
+      marker.bindPopup(popupContent, {
+        autoPan: true,
+        autoPanPaddingTopLeft: [50, 150],
+        autoPanPaddingBottomRight: [50, 50],
+        offset: L.point(0, -15)
+      });
+      marker.bindTooltip(`Lat: ${lat.toFixed(5)}, Lon: ${lon.toFixed(5)}`, { permanent: false, direction: 'top' });
+
+      marker.feature = {
+        type: 'Feature',
+        properties: { name: name, lat: lat, lon: lon, utm_e: Math.round(utm[0]), utm_n: Math.round(utm[1]), zone: zone },
+        geometry: { type: 'Point', coordinates: [lon, lat] }
+      };
+
+      tempDrawingGroup.addLayer(marker);
+      marker.openPopup();
+      
+      vertexMarkers.push(marker);
+      activePoints.push([lon, lat]);
+    }
+
+    map.on('click', (e) => {
+      const { lat, lng } = e.latlng;
+
+      if (isClickPinEnabled || activeToolMode === 'pin') {
+        const name = prompt('ระบุชื่อจุดพิกัด:', `จุดพิกัด (${lat.toFixed(4)}, ${lng.toFixed(4)})`);
+        if (name !== null) {
+          createPointMarker(lat, lng, name || 'จุดพิกัดชั่วคราว');
+          showToast('ปักหมุดเรียบร้อยแล้ว', 'success');
+        }
+        return;
+      }
+
+      if (!activeToolMode) return;
+
+      activePoints.push([lng, lat]);
+
+      const vMarker = L.circleMarker([lat, lng], {
+        radius: 5, color: '#ffffff', fillColor: activeToolMode === 'measure' ? '#ef4444' : '#10b981', fillOpacity: 1, weight: 2
+      }).addTo(map);
+      vertexMarkers.push(vMarker);
+
+      recalculateShape();
+    });
+
+    function recalculateShape() {
+      const content = document.getElementById('dock-content');
+
+      if (activeToolMode === 'measure') {
+        if (!activeLine) {
+          activeLine = L.polyline(activePoints.map(p => [p[1], p[0]]), { color: '#ef4444', weight: 4, dashArray: '6, 6' }).addTo(map);
+          activeLine.feature = { type: 'Feature', properties: { name: 'เส้นวัดระยะทาง' }, geometry: { type: 'LineString', coordinates: activePoints } };
+        } else {
+          activeLine.setLatLngs(activePoints.map(p => [p[1], p[0]]));
+          activeLine.feature.geometry.coordinates = activePoints;
+        }
+
+        if (activePoints.length >= 2) {
+          const lineString = turf.lineString(activePoints);
+          const distanceKm = turf.length(lineString, { units: 'kilometers' });
+          const distanceM = distanceKm * 1000;
+          content.innerHTML = `<b>ระยะทางรวม:</b> ${distanceM.toLocaleString(undefined, {maximumFractionDigits: 2})} เมตร (${distanceKm.toFixed(3)} กม.)`;
+        } else {
+          content.innerHTML = 'ปักจุดเริ่มต้นแล้ว... เลื่อนเมาส์แล้วคลิกจุดถัดไปเพื่อวัดระยะ';
+        }
+      } 
+      else if (activeToolMode === 'area') {
+        if (activePoints.length >= 3) {
+          const polyCoords = [...activePoints, activePoints[0]];
+          if (!activePolygon) {
+            activePolygon = L.polygon(polyCoords.map(p => [p[1], p[0]]), { color: '#10b981', fillColor: '#34d399', fillOpacity: 0.4 }).addTo(map);
+            activePolygon.feature = { type: 'Feature', properties: { name: 'แปลงคำนวณพื้นที่' }, geometry: { type: 'Polygon', coordinates: [polyCoords] } };
+          } else {
+            activePolygon.setLatLngs(polyCoords.map(p => [p[1], p[0]]));
+            activePolygon.feature.geometry.coordinates = [polyCoords];
+          }
+
+          const polygon = turf.polygon([polyCoords]);
+          const areaSqm = turf.area(polygon);
+          const rai = Math.floor(areaSqm / 1600);
+          const ngan = Math.floor((areaSqm % 1600) / 400);
+          const sqwa = ((areaSqm % 400) / 4).toFixed(1);
+
+          content.innerHTML = `<b>พื้นที่รวม:</b> ${areaSqm.toLocaleString(undefined, {maximumFractionDigits: 2})} ตร.ม.<br>• <b>${rai} ไร่ ${ngan} งาน ${sqwa} ตร.วา</b>`;
+        } else {
+          content.innerHTML = `ปักจุดแล้ว ${activePoints.length} จุด... ปักจุดเพิ่มอีกอย่างน้อย ${3 - activePoints.length} จุดเพื่อคำนวณพื้นที่`;
+        }
+      }
+    }
+
+    document.getElementById('btn-tool-clear').addEventListener('click', () => {
+      tempDrawingGroup.clearLayers();
+      clearTempDrawingSession();
+      setToolMode(null);
+      showToast('ล้างหมุดและรูปวาดชั่วคราวแล้ว', 'info');
+    });
+
+    document.getElementById('btn-tool-export').addEventListener('click', () => {
+      const geojson = tempDrawingGroup.toGeoJSON();
+      if (!geojson.features || geojson.features.length === 0) {
+        showToast('ไม่มีข้อมูลรูปวาดชั่วคราวให้ดาวน์โหลด', 'error');
+        return;
+      }
+
+      const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(geojson, null, 2));
+      const a = document.createElement('a');
+      a.setAttribute("href", dataStr);
+      a.setAttribute("download", `gis_export_${Date.now()}.geojson`);
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      showToast('ส่งออกไฟล์ GeoJSON เรียบร้อยแล้ว', 'success');
+    });
+
+    document.getElementById('btn-tool-save-layer').addEventListener('click', async () => {
+      if (!isAdminLoggedIn) {
+        showToast('กรุณาเข้าสู่ระบบ Admin ก่อนบันทึกชั้นข้อมูล', 'error');
+        return;
+      }
+
+      const geojson = tempDrawingGroup.toGeoJSON();
+      if (!geojson.features || geojson.features.length === 0) {
+        showToast('ไม่มีข้อมูลรูปวาดหรือพิกัดชั่วคราวบนแผนที่', 'error');
+        return;
+      }
+
+      const layerName = prompt('ระบุชื่อชั้นข้อมูลที่จะบันทึกลง Google Drive:', `ชั้นข้อมูลวาดมือ_${new Date().toLocaleDateString('th-TH')}`);
+      if (!layerName) return;
+
+      document.getElementById('loading-overlay').style.display = 'flex';
+
+      const newRecord = {
+        id: 'layer_' + Date.now(),
+        name: layerName,
+        type: 'GEOJSON',
+        visible: true,
+        style: { strokeColor: '#4f46e5', fillColor: '#6366f1', weight: 3, opacity: 1.0, showStroke: true, showFill: true, labelField: 'name' },
+        geoJSON: geojson
+      };
+
+      try {
+        const res = await apiFetch(null, 'POST', { action: 'saveLayer', token: adminToken, layerRecord: newRecord });
+        document.getElementById('loading-overlay').style.display = 'none';
+
+        if (res.success) {
+          tempDrawingGroup.clearLayers();
+          clearTempDrawingSession();
+          setToolMode(null);
+          
+          const clusterGroup = L.markerClusterGroup({ spiderfyOnMaxZoom: true, showCoverageOnHover: true });
+          runtimeLayers.set(newRecord.id, { record: newRecord, leafletLayer: clusterGroup, loaded: true });
+          createLayerCardUI(newRecord, clusterGroup);
+          attachGeoJSONToCluster(newRecord, newRecord.geoJSON, clusterGroup);
+
+          showToast(`บันทึกชั้นข้อมูล "${layerName}" เข้า Google Drive เรียบร้อยแล้ว`, 'success');
+        } else {
+          showToast('เกิดข้อผิดพลาดในการบันทึก: ' + res.error, 'error');
+        }
+      } catch (err) {
+        document.getElementById('loading-overlay').style.display = 'none';
+        showToast('ส่งข้อมูลไม่สำเร็จ: ' + err.message, 'error');
+      }
+    });
+
+    const runtimeLayers = new Map();
+
+    function eachVectorFeature(parentLayer, callback) {
+      if (!parentLayer) return;
+      if (parentLayer.eachLayer) {
+        parentLayer.eachLayer(child => eachVectorFeature(child, callback));
+      } else {
+        callback(parentLayer);
+      }
+    }
+
+    function updateClusterGroupStyle(clusterGroup, styleObj) {
+      eachVectorFeature(clusterGroup, (layer) => {
+        if (currentHighlightedFeature && currentHighlightedFeature.layer === layer) return;
+        if (layer.setStyle) {
+          const isLine = layer.feature && layer.feature.geometry && (layer.feature.geometry.type === 'LineString' || layer.feature.geometry.type === 'MultiLineString');
+          layer.setStyle({
+            stroke: styleObj.showStroke !== false,
+            color: styleObj.strokeColor || "#4f46e5",
+            weight: styleObj.weight || 3,
+            opacity: styleObj.showStroke !== false ? (styleObj.opacity ?? 1.0) : 0,
+            fill: !isLine && (styleObj.showFill !== false),
+            fillColor: styleObj.fillColor || "#4f46e5",
+            fillOpacity: !isLine && (styleObj.showFill !== false) ? (styleObj.opacity ?? 1.0) * 0.5 : 0
+          });
+        }
+      });
+    }
+
+    function applyLayerLabels(clusterGroup, fieldName) {
+      eachVectorFeature(clusterGroup, (layer) => {
+        layer.unbindTooltip();
+        if (fieldName && layer.feature && layer.feature.properties && layer.feature.properties[fieldName] !== undefined) {
+          const textVal = layer.feature.properties[fieldName];
+          layer.bindTooltip(String(textVal), { permanent: true, direction: 'center', className: 'custom-map-label' });
+        }
+      });
+    }
+
+    function highlightSelectedFeature(layer, layerRecord) {
+      resetCurrentHighlight();
+      if (layer.setStyle) {
+        const currentStyle = layerRecord.style || {};
+        const isLine = layer.feature && layer.feature.geometry && (layer.feature.geometry.type === 'LineString' || layer.feature.geometry.type === 'MultiLineString');
+        
+        currentHighlightedFeature = {
+          layer: layer,
+          originalStyle: {
+            stroke: currentStyle.showStroke !== false,
+            color: currentStyle.strokeColor || "#4f46e5",
+            weight: currentStyle.weight || 3,
+            opacity: currentStyle.showStroke !== false ? (currentStyle.opacity ?? 1.0) : 0,
+            fill: !isLine && (currentStyle.showFill !== false),
+            fillColor: currentStyle.fillColor || "#4f46e5",
+            fillOpacity: !isLine && (currentStyle.showFill !== false) ? (currentStyle.opacity ?? 1.0) * 0.5 : 0
+          }
+        };
+
+        layer.setStyle({
+          stroke: true, color: '#f97316', weight: Math.max((currentStyle.weight || 3) + 3, 6), opacity: 1.0, fill: !isLine, fillColor: '#fdba74', fillOpacity: 0.65
+        });
+        if (layer.bringToFront) layer.bringToFront();
+      }
+    }
+
+    function resetCurrentHighlight() {
+      if (currentHighlightedFeature) {
+        const { layer, originalStyle } = currentHighlightedFeature;
+        if (layer && layer.setStyle) layer.setStyle(originalStyle);
+        currentHighlightedFeature = null;
+      }
+    }
+
+    map.on('popupclose', () => resetCurrentHighlight());
+
+    function extractPropertiesFromHTMLDescription(htmlStr) {
+      const extracted = {};
+      try {
+        const parser = new DOMParser();
+        const doc = parser.parseFromString(htmlStr, 'text/html');
+        const rows = doc.querySelectorAll('table tr');
+
+        rows.forEach(row => {
+          const cells = row.querySelectorAll('td, th');
+          if (cells.length >= 2) {
+            const key = cells[0].textContent.trim();
+            const val = cells[1].textContent.trim();
+            if (key && val) extracted[key] = val;
+          }
+        });
+      } catch (e) {
+        console.error("HTML Parse Error", e);
+      }
+      return extracted;
+    }
+
+    function updateLabelDropdownOptions(layerRecord) {
+      const selectElem = document.getElementById(`sel_label_${layerRecord.id}`);
+      if (!selectElem) return;
+
+      const propertyKeySet = new Set();
+      if (layerRecord.geoJSON && layerRecord.geoJSON.features) {
+        layerRecord.geoJSON.features.forEach(f => {
+          if (f.properties) {
+            Object.keys(f.properties).forEach(k => {
+              if (k.toLowerCase() !== 'description') propertyKeySet.add(k);
+            });
+            if (f.properties.description && typeof f.properties.description === 'string') {
+              const parsed = extractPropertiesFromHTMLDescription(f.properties.description);
+              Object.keys(parsed).forEach(k => propertyKeySet.add(k));
+            }
+          }
+        });
+      }
+
+      let optionsHtml = '<option value="">-- ไม่แสดงตัวหนังสือ --</option>';
+      Array.from(propertyKeySet).forEach(key => {
+        const selected = layerRecord.style?.labelField === key ? 'selected' : '';
+        optionsHtml += `<option value="${key}" ${selected}>${key}</option>`;
+      });
+
+      selectElem.innerHTML = optionsHtml;
+    }
+
+    function createLayerCardUI(layerRecord, leafletLayer) {
+      const card = document.createElement('div');
+      card.className = 'layer-card p-3 bg-slate-50 border border-slate-200 rounded-2xl space-y-2 text-xs';
+      card.id = `card_${layerRecord.id}`;
+
+      const st = layerRecord.style || {};
+      const showStroke = st.showStroke !== false;
+      const showFill = st.showFill !== false;
+
+      card.innerHTML = `
+        <div class="flex items-center justify-between gap-2">
+          <div class="flex items-center gap-2 overflow-hidden flex-1">
+            <input type="checkbox" id="chk_${layerRecord.id}" ${layerRecord.visible ? 'checked' : ''} class="accent-brand-600 w-4 h-4 cursor-pointer">
+            <span class="layer-name font-bold text-slate-800 truncate" id="name_${layerRecord.id}">${layerRecord.name}</span>
+            <span class="px-1.5 py-0.5 bg-brand-100 text-brand-700 font-bold rounded-md text-[10px]">${layerRecord.type}</span>
+          </div>
+          <div class="flex items-center gap-1">
+            <button class="p-1 hover:bg-slate-200 rounded-lg text-slate-600" id="style_${layerRecord.id}" title="ปรับแต่งสไตล์">🎨</button>
+            <button class="p-1 hover:bg-slate-200 rounded-lg text-slate-600" id="zoom_${layerRecord.id}" title="ขยายไปยังพื้นที่">🔍</button>
+            <button class="p-1 hover:bg-slate-200 rounded-lg text-slate-600 admin-only" id="editname_${layerRecord.id}" title="เปลี่ยนชื่อ">✏️</button>
+            <button class="p-1 hover:bg-red-100 rounded-lg text-red-600 admin-only" id="del_${layerRecord.id}" title="ลบ">🗑️</button>
+          </div>
+        </div>
+
+        <div class="flex items-center gap-2 text-slate-500 font-medium">
+          <span>ความโปร่งแสง</span>
+          <input type="range" id="sld_${layerRecord.id}" min="0" max="100" value="${(st.opacity ?? 1.0) * 100}" class="flex-1 accent-brand-600">
+          <span id="lbl_${layerRecord.id}">${Math.round((st.opacity ?? 1.0) * 100)}%</span>
+        </div>
+
+        <div class="style-panel hidden pt-2 border-t border-slate-200 space-y-2" id="pnl_${layerRecord.id}">
+          <div class="flex items-center justify-between">
+            <label class="text-slate-600 font-medium">แสดงข้อความ</label>
+            <select id="sel_label_${layerRecord.id}" class="p-1 bg-white border border-slate-200 rounded-lg text-[11px] font-medium text-slate-700 max-w-[170px] truncate">
+              <option value="">-- ไม่แสดงตัวหนังสือ --</option>
+            </select>
+          </div>
+          <div class="flex items-center justify-between">
+            <label class="text-slate-600 font-medium">สีเส้น</label>
+            <div class="flex items-center gap-2">
+              <input type="color" id="clr_stroke_${layerRecord.id}" value="${st.strokeColor || '#4f46e5'}" class="w-6 h-6 border-0 bg-transparent cursor-pointer">
+              <label class="text-[11px]"><input type="checkbox" id="chk_no_stroke_${layerRecord.id}" ${!showStroke ? 'checked' : ''}> ซ่อน</label>
+            </div>
+          </div>
+          <div class="flex items-center justify-between">
+            <label class="text-slate-600 font-medium">สีพื้นหลัง</label>
+            <div class="flex items-center gap-2">
+              <input type="color" id="clr_fill_${layerRecord.id}" value="${st.fillColor || '#4f46e5'}" class="w-6 h-6 border-0 bg-transparent cursor-pointer">
+              <label class="text-[11px]"><input type="checkbox" id="chk_no_fill_${layerRecord.id}" ${!showFill ? 'checked' : ''}> ซ่อน</label>
+            </div>
+          </div>
+          <div class="flex items-center justify-between">
+            <label class="text-slate-600 font-medium">ขนาดเส้น (<span id="lbl_w_${layerRecord.id}">${st.weight || 3}</span>px)</label>
+            <input type="range" id="weight_${layerRecord.id}" min="1" max="20" value="${st.weight || 3}" class="w-24 accent-brand-600">
+          </div>
+        </div>
+      `;
+
+      document.getElementById('uploaded-layers-list').prepend(card);
+
+      updateLabelDropdownOptions(layerRecord);
+
+      const chk = card.querySelector(`#chk_${layerRecord.id}`);
+      const sld = card.querySelector(`#sld_${layerRecord.id}`);
+      const lbl = card.querySelector(`#lbl_${layerRecord.id}`);
+      const del = card.querySelector(`#del_${layerRecord.id}`);
+      const zoom = card.querySelector(`#zoom_${layerRecord.id}`);
+      const btnStyle = card.querySelector(`#style_${layerRecord.id}`);
+      const btnEditName = card.querySelector(`#editname_${layerRecord.id}`);
+      const pnlStyle = card.querySelector(`#pnl_${layerRecord.id}`);
+
+      chk.addEventListener('change', (e) => {
+        layerRecord.visible = e.target.checked;
+        if (layerRecord.visible) map.addLayer(leafletLayer);
+        else map.removeLayer(leafletLayer);
+        persistToDrive(layerRecord);
+      });
+
+      if (btnStyle) {
+        btnStyle.addEventListener('click', () => pnlStyle.classList.toggle('hidden'));
+        const strokeInput = card.querySelector(`#clr_stroke_${layerRecord.id}`);
+        const fillInput = card.querySelector(`#clr_fill_${layerRecord.id}`);
+        const chkNoStroke = card.querySelector(`#chk_no_stroke_${layerRecord.id}`);
+        const chkNoFill = card.querySelector(`#chk_no_fill_${layerRecord.id}`);
+        const weightInput = card.querySelector(`#weight_${layerRecord.id}`);
+        const labelSelect = card.querySelector(`#sel_label_${layerRecord.id}`);
+        const lblWeight = card.querySelector(`#lbl_w_${layerRecord.id}`);
+
+        const updateStyleLive = () => {
+          if (!layerRecord.style) layerRecord.style = {};
+          const opacityVal = parseFloat(sld.value) / 100;
+          lbl.textContent = `${sld.value}%`;
+
+          layerRecord.style.opacity = opacityVal;
+          layerRecord.style.strokeColor = strokeInput.value;
+          layerRecord.style.fillColor = fillInput.value;
+          layerRecord.style.showStroke = !chkNoStroke.checked;
+          layerRecord.style.showFill = !chkNoFill.checked;
+          layerRecord.style.weight = parseInt(weightInput.value);
+          layerRecord.style.labelField = labelSelect.value;
+          lblWeight.textContent = weightInput.value;
+
+          updateClusterGroupStyle(leafletLayer, layerRecord.style);
+          applyLayerLabels(leafletLayer, layerRecord.style.labelField);
+        };
+
+        sld.addEventListener('input', updateStyleLive);
+        strokeInput.addEventListener('input', updateStyleLive);
+        fillInput.addEventListener('input', updateStyleLive);
+        chkNoStroke.addEventListener('change', updateStyleLive);
+        chkNoFill.addEventListener('change', updateStyleLive);
+        weightInput.addEventListener('input', updateStyleLive);
+        labelSelect.addEventListener('change', updateStyleLive);
+
+        sld.addEventListener('change', () => persistToDrive(layerRecord));
+        strokeInput.addEventListener('change', () => persistToDrive(layerRecord));
+        fillInput.addEventListener('change', () => persistToDrive(layerRecord));
+        chkNoStroke.addEventListener('change', () => persistToDrive(layerRecord));
+        chkNoFill.addEventListener('change', () => persistToDrive(layerRecord));
+        weightInput.addEventListener('change', () => persistToDrive(layerRecord));
+        labelSelect.addEventListener('change', () => persistToDrive(layerRecord));
+      }
+
+      if (btnEditName) {
+        btnEditName.addEventListener('click', () => {
+          const newName = prompt('ระบุชื่อชั้นข้อมูลใหม่:', layerRecord.name);
+          if (newName && newName.trim() !== '') {
+            layerRecord.name = newName.trim();
+            card.querySelector(`#name_${layerRecord.id}`).textContent = layerRecord.name;
+            persistToDrive(layerRecord);
+          }
+        });
+      }
+
+      if (zoom) {
+        zoom.addEventListener('click', () => {
+          try {
+            const bounds = leafletLayer.getBounds ? leafletLayer.getBounds() : L.featureGroup(leafletLayer.getLayers()).getBounds();
+            if (bounds && bounds.isValid()) {
+              map.fitBounds(bounds, { padding: [40, 40] });
+              sidebar.classList.add('translate-x-full');
+            }
+          } catch (e) { showToast('ไม่สามารถหาขอบเขตพื้นที่ชั้นข้อมูลนี้ได้', 'error'); }
+        });
+      }
+
+      if (del) {
+        del.addEventListener('click', async () => {
+          if (confirm(`คุณต้องการลบชั้นข้อมูล "${layerRecord.name}" หรือไม่?`)) {
+            document.getElementById('loading-overlay').style.display = 'flex';
+            try {
+              const res = await apiFetch(null, 'POST', { action: 'deleteLayer', token: adminToken, layerId: layerRecord.id });
+              document.getElementById('loading-overlay').style.display = 'none';
+
+              if (res.success) {
+                map.removeLayer(leafletLayer);
+                runtimeLayers.delete(layerRecord.id);
+                card.remove();
+                showToast('ลบชั้นข้อมูลเรียบร้อยแล้ว', 'success');
+              } else {
+                showToast('ลบชั้นข้อมูลไม่สำเร็จ: ' + res.error, 'error');
+              }
+            } catch (err) {
+              document.getElementById('loading-overlay').style.display = 'none';
+              showToast('ส่งคำสั่งไม่สำเร็จ: ' + err.message, 'error');
+            }
+          }
+        });
+      }
+
+      refreshUIState();
+    }
+
+    function attachGeoJSONToCluster(layerRecord, geoJSON, clusterGroup) {
+      const st = layerRecord.style || { strokeColor: "#4f46e5", fillColor: "#4f46e5", weight: 3, opacity: 1.0, showStroke: true, showFill: true, labelField: "" };
+
+      const vectorLayer = L.geoJSON(geoJSON, {
+        style: (feature) => {
+          const isLine = feature && feature.geometry && (feature.geometry.type === 'LineString' || feature.geometry.type === 'MultiLineString');
+          return {
+            stroke: st.showStroke !== false,
+            color: st.strokeColor || "#4f46e5",
+            weight: st.weight || 3,
+            opacity: st.showStroke !== false ? (st.opacity ?? 1.0) : 0,
+            fill: !isLine && (st.showFill !== false),
+            fillColor: st.fillColor || "#4f46e5",
+            fillOpacity: !isLine && (st.showFill !== false) ? (st.opacity ?? 1.0) * 0.5 : 0
+          };
+        },
+        onEachFeature: (feature, layer) => bindCleanPopup(feature, layer, layerRecord)
+      });
+
+      clusterGroup.addLayer(vectorLayer);
+      if (layerRecord.visible) map.addLayer(clusterGroup);
+      if (st.labelField) applyLayerLabels(clusterGroup, st.labelField);
+
+      return vectorLayer.getBounds();
+    }
+
+    function bindCleanPopup(feature, layer, layerRecord) {
+      if (!feature.properties) feature.properties = {};
+
+      let allProperties = { ...feature.properties };
+
+      if (allProperties.description && typeof allProperties.description === 'string') {
+        const parsedTable = extractPropertiesFromHTMLDescription(allProperties.description);
+        allProperties = { ...allProperties, ...parsedTable };
+      }
+
+      const formatKeyTitle = (key) => {
+        return key
+          .replace(/[-_]/g, ' ')
+          .replace(/([a-z])([A-Z])/g, '$1 $2')
+          .toLowerCase()
+          .replace(/\b\w/g, l => l.toUpperCase());
+      };
+
+      const renderPopupContent = () => {
+        let html = `
+          <div class="popup-header">
+            <span>📌 ${layerRecord.name}</span>
+          </div>
+          <div class="popup-container">
+            <form id="pop_form">
+        `;
+        
+        let validFieldsCount = 0;
+        let detectedRoadCode = null;
+
+        for (const [key, rawVal] of Object.entries(allProperties)) {
+          if (key.toLowerCase() === 'description') continue;
+
+          let valStr = String(rawVal ?? '').replace(/<[^>]*>?/gm, '').trim();
+          if (valStr === '' || valStr === 'null' || valStr === 'undefined') continue;
+
+          const normKey = key.toUpperCase().trim();
+          if (['CODE', 'ROAD_CODE', 'ROADCODE', 'สายทาง', 'รหัสสายทาง'].includes(normKey)) {
+            detectedRoadCode = valStr;
+          }
+
+          validFieldsCount++;
+          const formattedKeyLabel = formatKeyTitle(key);
+
+          if (isAdminLoggedIn) {
+            html += `
+              <div class="prop-row">
+                <div class="prop-key-inline">${formattedKeyLabel}</div>
+                <input type="text" name="${key}" value="${valStr}">
+              </div>
+            `;
+          } else {
+            html += `
+              <div class="prop-row">
+                <div class="prop-key-inline">${formattedKeyLabel}</div>
+                <div class="prop-val-inline">${valStr}</div>
+              </div>
+            `;
+          }
+        }
+
+        if (validFieldsCount === 0) {
+          html += `<div class="text-center text-slate-400 py-4 font-medium">ไม่มีรายละเอียดข้อมูลเพิ่มเติม</div>`;
+        }
+
+        if (detectedRoadCode) {
+          html += `
+            <div class="mt-2 pt-2 border-t border-slate-200">
+              <button type="button" onclick="openHighwayApp('${detectedRoadCode}')" class="w-full py-2 px-3 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold shadow-md transition flex items-center justify-center gap-1.5">
+                📊 ดูข้อมูลสายทาง / เอกสารแนบ
+              </button>
+            </div>
+          `;
+        }
+        
+        if (isAdminLoggedIn) {
+          html += '<button type="button" class="btn-popup-save" id="btn_save_pop">💾 บันทึกการแก้ไขข้อมูล</button>';
+        }
+        html += '</form></div>';
+        return html;
+      };
+
+      layer.bindPopup(renderPopupContent, {
+        autoPan: true,
+        autoPanPaddingTopLeft: L.point(50, 150),
+        autoPanPaddingBottomRight: L.point(50, 50),
+        offset: L.point(0, -15)
+      });
+
+      layer.on('click', (e) => {
+        highlightSelectedFeature(layer, layerRecord);
+        if (e.latlng) {
+          map.panTo(e.latlng, { animate: true, duration: 0.5 });
+        }
+      });
+
+      layer.on('popupopen', (e) => {
+        const popupNode = e.popup.getElement();
+        if (!popupNode) return;
+        const btnSave = popupNode.querySelector('#btn_save_pop');
+        if (btnSave && isAdminLoggedIn) {
+          btnSave.addEventListener('click', () => {
+            const formData = new FormData(popupNode.querySelector('#pop_form'));
+            for (const [key, val] of formData.entries()) feature.properties[key] = val;
+            persistToDrive(layerRecord);
+            showToast('บันทึกตารางข้อมูลเรียบร้อยแล้ว', 'success');
+            layer.closePopup();
+          });
+        }
+      });
+    }
+
+    async function persistToDrive(layerRecord) {
+      if (!isAdminLoggedIn) return;
+      try {
+        await apiFetch(null, 'POST', { action: 'saveLayer', token: adminToken, layerRecord: layerRecord });
+      } catch (err) {
+        console.error("Save failed", err);
+      }
+    }
+
+    async function processUploadedFile(file) {
+      if (!isAdminLoggedIn) {
+        showToast('กรุณาเข้าสู่ระบบ Admin ก่อนอัปโหลดไฟล์', 'error');
+        return;
+      }
+
+      document.getElementById('loading-overlay').style.display = 'flex';
+      const fileName = file.name;
+      const ext = fileName.split('.').pop().toLowerCase();
+      const layerName = fileName.replace(/\.[^/.]+$/, "");
+      let geoJSONData = null;
+      let fileType = 'GEOJSON';
+
+      try {
+        if (ext === 'kmz') {
+          fileType = 'KMZ';
+          const zip = await JSZip.loadAsync(file);
+          let kmlFile = zip.file(/\.kml$/i)[0];
+          if (!kmlFile) throw new Error('ไม่พบไฟล์ KML ใน KMZ');
+          const kmlText = await kmlFile.async('text');
+          const dom = new DOMParser().parseFromString(kmlText, 'text/xml');
+          geoJSONData = toGeoJSON.kml(dom);
+        } else if (ext === 'kml') {
+          fileType = 'KML';
+          const text = await file.text();
+          const dom = new DOMParser().parseFromString(text, 'text/xml');
+          geoJSONData = toGeoJSON.kml(dom);
+        } else if (ext === 'zip') {
+          fileType = 'SHP';
+          const buffer = await file.arrayBuffer();
+          geoJSONData = await shp(buffer);
+        } else if (ext === 'geojson' || ext === 'json') {
+          fileType = 'GEOJSON';
+          const text = await file.text();
+          geoJSONData = JSON.parse(text);
+        } else {
+          showToast('รูปแบบไฟล์ไม่รองรับ!', 'error');
+          document.getElementById('loading-overlay').style.display = 'none';
+          return;
+        }
+
+        const newRecord = {
+          id: 'layer_' + Date.now(),
+          name: layerName,
+          type: fileType,
+          visible: true,
+          style: { strokeColor: '#4f46e5', fillColor: '#6366f1', weight: 3, opacity: 1.0, showStroke: true, showFill: true, labelField: '' },
+          geoJSON: geoJSONData
+        };
+
+        const res = await apiFetch(null, 'POST', { action: 'saveLayer', token: adminToken, layerRecord: newRecord });
+        document.getElementById('loading-overlay').style.display = 'none';
+
+        if (res.success) {
+          const clusterGroup = L.markerClusterGroup({ spiderfyOnMaxZoom: true, showCoverageOnHover: true });
+          runtimeLayers.set(newRecord.id, { record: newRecord, leafletLayer: clusterGroup, loaded: true });
+          createLayerCardUI(newRecord, clusterGroup);
+          
+          updateLabelDropdownOptions(newRecord);
+
+          const bounds = attachGeoJSONToCluster(newRecord, geoJSONData, clusterGroup);
+          if (bounds && bounds.isValid()) map.fitBounds(bounds, { padding: [40, 40] });
+          
+          showToast(`อัปโหลดชั้นข้อมูล "${layerName}" เรียบร้อยแล้ว`, 'success');
+        } else {
+          showToast('บันทึกลง Google Drive ไม่สำเร็จ: ' + res.error, 'error');
+        }
+
+      } catch (err) {
+        document.getElementById('loading-overlay').style.display = 'none';
+        showToast(`ประมวลผลไฟล์ผิดพลาด: ${err.message}`, 'error');
+      }
+    }
+
+    async function bootstrap() {
+      try {
+        const res = await apiFetch({ action: 'getMetadataList' });
+        document.getElementById('loading-overlay').style.display = 'none';
+        
+        if (res.success && res.data.length > 0) {
+          const metadataList = res.data;
+          
+          metadataList.forEach(layerMeta => {
+            const clusterGroup = L.markerClusterGroup({ spiderfyOnMaxZoom: true, showCoverageOnHover: true });
+            runtimeLayers.set(layerMeta.id, { record: layerMeta, leafletLayer: clusterGroup, loaded: false });
+            createLayerCardUI(layerMeta, clusterGroup);
+          });
+
+          const allBounds = L.latLngBounds([]);
+          let loadedCount = 0;
+
+          metadataList.forEach(async (layerMeta) => {
+            try {
+              const geoRes = await apiFetch({ action: 'getSingleLayer', layerId: layerMeta.id });
+              loadedCount++;
+              if (geoRes.success) {
+                const layerObj = runtimeLayers.get(geoRes.layerId);
+                if (layerObj) {
+                  layerObj.record.geoJSON = geoRes.geoJSON;
+                  layerObj.loaded = true;
+
+                  updateLabelDropdownOptions(layerObj.record);
+
+                  const bounds = attachGeoJSONToCluster(layerObj.record, geoRes.geoJSON, layerObj.leafletLayer);
+                  if (bounds && bounds.isValid()) allBounds.extend(bounds);
+                }
+              }
+
+              if (loadedCount === metadataList.length && allBounds.isValid()) {
+                map.fitBounds(allBounds, { padding: [40, 40] });
+              }
+            } catch (e) {
+              console.error("Layer load err", e);
+            }
+          });
+        }
+      } catch (err) {
+        document.getElementById('loading-overlay').style.display = 'none';
+        showToast('ไม่สามารถดึงข้อมูลชั้นข้อมูลแผนที่ได้: ' + err.message, 'error');
+      }
+
+      fileInput.addEventListener('change', function (e) {
+        if (e.target.files[0]) {
+          processUploadedFile(e.target.files[0]);
+          this.value = '';
+        }
+      });
+
+      applyAdminState();
+    }
+
+    bootstrap();
+  </script>
+</body>
+</html>
