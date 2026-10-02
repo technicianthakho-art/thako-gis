@@ -175,7 +175,7 @@
   <!-- Toast Notification System -->
   <div id="toast-container" class="fixed top-20 left-1/2 -translate-x-1/2 z-[9999] pointer-events-none flex flex-col gap-2"></div>
 
-  <!-- SECTION 1: TOP HEADER NAVIGATION BAR (Capsule Soft-Edge) -->
+  <!-- SECTION 1: TOP HEADER NAVIGATION BAR -->
   <div class="fixed top-4 left-4 sm:left-6 right-4 z-[1000] flex flex-wrap items-center justify-between gap-3 pointer-events-none">
     <div class="glass-card rounded-full px-5 py-2.5 shadow-2xl pointer-events-auto flex items-center gap-3">
       <div class="p-2 bg-brand-600 text-white rounded-full shadow-md">
@@ -217,7 +217,7 @@
     </div>
   </div>
 
-  <!-- SECTION 2: RIGHT ACTION TOOLBAR (Vertical Soft Pill Dock) -->
+  <!-- SECTION 2: RIGHT ACTION TOOLBAR -->
   <div class="fixed top-20 right-4 z-[1000] flex flex-col gap-2 pointer-events-auto">
     <div class="glass-card rounded-full p-2 shadow-2xl flex flex-col gap-2">
       <button id="btn-tool-coord" class="p-3 text-slate-700 hover:bg-white hover:text-brand-600 rounded-full transition-all transform hover:scale-110 shadow-sm flex items-center justify-center" title="ปักพิกัดตำแหน่ง">
@@ -241,7 +241,7 @@
     </div>
   </div>
 
-  <!-- SECTION 3: SIDEBAR LAYER DRAWER (Floating Curved Sheet) -->
+  <!-- SECTION 3: SIDEBAR LAYER DRAWER -->
   <aside id="sidebar" class="fixed top-4 right-4 bottom-4 h-[calc(100vh-32px)] w-[340px] max-w-[85vw] bg-white/95 backdrop-blur-2xl z-[1005] shadow-2xl rounded-3xl border border-white/80 translate-x-[360px] transition-transform duration-300 flex flex-col overflow-hidden">
     <div class="p-4 border-b border-slate-100 flex items-center justify-between font-bold text-slate-900 text-sm">
       <span class="flex items-center gap-2"><i data-lucide="layers" class="w-4 h-4 text-brand-600"></i> รายการชั้นข้อมูล</span>
@@ -271,7 +271,7 @@
     </div>
   </aside>
 
-  <!-- SECTION 4: BOTTOM FLOATING DOCK (Floating Curved Control Pill) -->
+  <!-- SECTION 4: BOTTOM FLOATING DOCK -->
   <div id="bottom-tool-dock" class="fixed bottom-6 left-1/2 -translate-x-1/2 z-[1000] pointer-events-auto hidden transition-all duration-300">
     <div class="glass-card rounded-3xl p-5 shadow-2xl border border-white/80 max-w-md w-[90vw] sm:w-[420px] flex flex-col gap-2.5 text-xs">
       <div class="flex items-center justify-between font-bold text-slate-800 border-b border-slate-200/60 pb-2">
@@ -289,7 +289,7 @@
     </div>
   </div>
 
-  <!-- SECTION 5: MODALS (Soft Round Modal) -->
+  <!-- SECTION 5: MODALS -->
   <div id="modal-convert" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-[9000] flex items-center justify-center p-4 hidden">
     <div class="glass-card rounded-3xl p-6 w-full max-w-sm shadow-2xl space-y-4 border border-white/80 text-xs">
       <div class="flex items-center justify-between font-bold text-slate-900 text-sm border-b pb-2">
@@ -398,7 +398,38 @@
     </div>
   </div>
 
-  <!-- SECTION 6: ADMIN LOGIN MODAL -->
+  <!-- SECTION 6: MODAL SAVE LAYER WITH DEFAULT ATTRIBUTE TEMPLATE -->
+  <div id="modal-save-layer" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-[9000] flex items-center justify-center p-4 hidden">
+    <div class="glass-card rounded-3xl p-6 w-full max-w-md shadow-2xl space-y-3.5 border border-white/80 text-xs max-h-[90vh] overflow-y-auto">
+      <div class="flex items-center justify-between font-bold text-slate-900 text-sm border-b pb-2">
+        <span class="flex items-center gap-2"><i data-lucide="save" class="w-4 h-4 text-brand-600"></i> บันทึกชั้นข้อมูลลง Google Drive</span>
+        <button id="close-modal-save-layer" class="p-1 text-slate-400 hover:text-slate-600"><i data-lucide="x" class="w-5 h-5"></i></button>
+      </div>
+
+      <form id="form-save-layer" class="space-y-3">
+        <div>
+          <label class="font-bold text-slate-800">ชื่อชั้นข้อมูล <span class="text-red-500">*</span></label>
+          <input type="text" id="save-layer-name" required placeholder="เช่น ชั้นข้อมูลถนน คสล. หมู่ 3" class="w-full p-2.5 bg-white border border-slate-200 rounded-2xl outline-none focus:ring-2 focus:ring-brand-500 font-semibold" />
+        </div>
+
+        <div class="p-3 bg-brand-50/60 border border-brand-100 rounded-2xl space-y-2 text-brand-900">
+          <div class="font-bold flex items-center gap-1"><i data-lucide="info" class="w-3.5 h-3.5"></i> คุณลักษณะมาตรฐาน (กองช่าง อบต.ท่าก๊อ)</div>
+          <div class="text-[11px] text-slate-600 leading-relaxed">กรอกข้อมูลเฉพาะช่องที่ต้องการ ไม่บังคับกรอกทุกช่อง</div>
+        </div>
+
+        <div id="save-template-fields" class="space-y-2.5">
+          <!-- Dynamic Form Fields Generated via JS -->
+        </div>
+
+        <div class="pt-2 flex gap-2">
+          <button type="button" id="btn-cancel-save-layer" class="flex-1 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-2xl font-bold transition">ยกเลิก</button>
+          <button type="submit" class="flex-1 py-2.5 bg-brand-600 hover:bg-brand-700 text-white rounded-2xl font-bold shadow-md transition">ตกลงบันทึก</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- SECTION 7: ADMIN LOGIN MODAL -->
   <div id="modal-admin-login" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-[9000] flex items-center justify-center p-4 hidden">
     <div class="glass-card rounded-3xl p-6 w-full max-w-sm shadow-2xl space-y-4 border border-white/80">
       <div class="flex items-center justify-between font-bold text-slate-900 text-sm border-b pb-2">
@@ -415,7 +446,7 @@
     </div>
   </div>
 
-  <!-- SECTION 7: JAVASCRIPT LOGIC ENGINE -->
+  <!-- SECTION 8: JAVASCRIPT LOGIC ENGINE -->
   <script>
     // URL ของ REST API บน Google Apps Script
     const API_URL = "https://script.google.com/macros/s/AKfycbyz6Am3mNYcM_LqgTBo7bOMyXuN9cAC3vbbcILLjHhxwBx3_vWP2Xdk5V5IFRrXYlhlow/exec";
@@ -990,7 +1021,15 @@
       a.remove();
     }
 
-    document.getElementById('btn-tool-save-layer').addEventListener('click', async () => {
+    // --- Modal Save Layer Management ---
+    const modalSaveLayer = document.getElementById('modal-save-layer');
+    const formSaveLayer = document.getElementById('form-save-layer');
+    const saveTemplateFieldsContainer = document.getElementById('save-template-fields');
+
+    document.getElementById('close-modal-save-layer').addEventListener('click', () => modalSaveLayer.classList.add('hidden'));
+    document.getElementById('btn-cancel-save-layer').addEventListener('click', () => modalSaveLayer.classList.add('hidden'));
+
+    document.getElementById('btn-tool-save-layer').addEventListener('click', () => {
       if (!isAdminLoggedIn) {
         showToast('กรุณาเข้าสู่ระบบ Admin ก่อนบันทึกชั้นข้อมูล', 'error');
         return;
@@ -1002,9 +1041,73 @@
         return;
       }
 
-      const layerName = prompt('ระบุชื่อชั้นข้อมูลที่จะบันทึกลง Google Drive:', `ชั้นข้อมูลวาดมือ_${new Date().toLocaleDateString('th-TH')}`);
+      // ตรวจสอบประเภทการวาดหลัก
+      let detectType = 'GEOJSON';
+      let templateHtml = '';
+
+      if (activeToolMode === 'measure') {
+        const lineString = turf.lineString(activePoints);
+        const distKm = turf.length(lineString, { units: 'kilometers' });
+        const distM = (distKm * 1000).toFixed(2);
+
+        templateHtml = `
+          <div><label class="font-semibold text-slate-600">รหัสสายทาง / ชื่อถนน</label><input type="text" name="code" placeholder="เช่น วร.ถ 75-043" class="w-full p-2 bg-white border border-slate-200 rounded-xl"></div>
+          <div><label class="font-semibold text-slate-600">หมู่ที่ / ชื่อหมู่บ้าน</label><input type="text" name="village" placeholder="เช่น หมู่ที่ 3 บ้านท่าก๊อ" class="w-full p-2 bg-white border border-slate-200 rounded-xl"></div>
+          <div><label class="font-semibold text-slate-600">ประเภทผิวจราจร</label><input type="text" name="surface_type" placeholder="เช่น ถนน คสล., ถนนลูกรัง" class="w-full p-2 bg-white border border-slate-200 rounded-xl"></div>
+          <div><label class="font-semibold text-slate-600">ความกว้าง (เมตร)</label><input type="text" name="width" placeholder="เช่น 4.00" class="w-full p-2 bg-white border border-slate-200 rounded-xl"></div>
+          <div><label class="font-semibold text-slate-600">ความยาว (คำนวณอัตโนมัติ)</label><input type="text" name="length" value="${distM} เมตร (${distKm.toFixed(3)} กม.)" readonly class="w-full p-2 bg-slate-100 border border-slate-200 rounded-xl font-bold text-slate-700"></div>
+          <div><label class="font-semibold text-slate-600">บันทึกข้อความ (จดช่วยจำ)</label><textarea name="memo" rows="2" placeholder="เช่น ผิวจราจรเป็นหลุมขนมครก ช่วงต้นสาย..." class="w-full p-2 bg-white border border-slate-200 rounded-xl"></textarea></div>
+          <div><label class="font-semibold text-slate-600">หมายเหตุ</label><input type="text" name="remark" placeholder="เช่น บรรจุแผนพัฒนาท้องถิ่นปี 2570" class="w-full p-2 bg-white border border-slate-200 rounded-xl"></div>
+        `;
+      } else if (activeToolMode === 'area') {
+        const polyCoords = [...activePoints, activePoints[0]];
+        const polygon = turf.polygon([polyCoords]);
+        const areaSqm = turf.area(polygon);
+        const rai = Math.floor(areaSqm / 1600);
+        const ngan = Math.floor((areaSqm % 1600) / 400);
+        const sqwa = ((areaSqm % 400) / 4).toFixed(1);
+
+        templateHtml = `
+          <div><label class="font-semibold text-slate-600">ชื่อแปลง / ชื่อโครงการ</label><input type="text" name="parcel_name" placeholder="เช่น ที่ดินสาธารณะประโยชน์หนองหลวง" class="w-full p-2 bg-white border border-slate-200 rounded-xl"></div>
+          <div><label class="font-semibold text-slate-600">หมู่ที่ / ชื่อหมู่บ้าน</label><input type="text" name="village" placeholder="เช่น หมู่ที่ 2 บ้านท่าก๊อ" class="w-full p-2 bg-white border border-slate-200 rounded-xl"></div>
+          <div><label class="font-semibold text-slate-600">การใช้ประโยชน์</label><input type="text" name="use_type" placeholder="เช่น ที่สาธารณประโยชน์, อาคารราชการ" class="w-full p-2 bg-white border border-slate-200 rounded-xl"></div>
+          <div><label class="font-semibold text-slate-600">ขนาดพื้นที่ (คำนวณอัตโนมัติ)</label><input type="text" name="area_thai" value="${rai} ไร่ ${ngan} งาน ${sqwa} ตร.วา (${areaSqm.toFixed(2)} ตร.ม.)" readonly class="w-full p-2 bg-slate-100 border border-slate-200 rounded-xl font-bold text-slate-700"></div>
+          <div><label class="font-semibold text-slate-600">บันทึกข้อความ (จดช่วยจำ)</label><textarea name="memo" rows="2" placeholder="เช่น เป็นพื้นที่ลุ่มต่ำ มีสิ่งปลูกสร้างรุกล้ำ 1 หลัง..." class="w-full p-2 bg-white border border-slate-200 rounded-xl"></textarea></div>
+          <div><label class="font-semibold text-slate-600">หมายเหตุ</label><input type="text" name="remark" placeholder="เช่น มีหนังสือ นสล." class="w-full p-2 bg-white border border-slate-200 rounded-xl"></div>
+        `;
+      } else {
+        templateHtml = `
+          <div><label class="font-semibold text-slate-600">หมู่ที่ / ชื่อหมู่บ้าน</label><input type="text" name="village" placeholder="เช่น หมู่ที่ 5 บ้านท่าก๊อ" class="w-full p-2 bg-white border border-slate-200 rounded-xl"></div>
+          <div><label class="font-semibold text-slate-600">หมวดหมู่ / ประเภท</label><input type="text" name="category" placeholder="เช่น ไฟฟ้าสาธารณะ, ร้องเรียน" class="w-full p-2 bg-white border border-slate-200 rounded-xl"></div>
+          <div><label class="font-semibold text-slate-600">บันทึกข้อความ (จดช่วยจำ)</label><textarea name="memo" rows="2" placeholder="เช่น โคมไฟชำรุด, เสาเอียง..." class="w-full p-2 bg-white border border-slate-200 rounded-xl"></textarea></div>
+          <div><label class="font-semibold text-slate-600">หมายเหตุ</label><input type="text" name="remark" placeholder="เช่น รอจัดซื้องบปี 2570" class="w-full p-2 bg-white border border-slate-200 rounded-xl"></div>
+        `;
+      }
+
+      saveTemplateFieldsContainer.innerHTML = templateHtml;
+      document.getElementById('save-layer-name').value = `ชั้นข้อมูลวาดมือ_${new Date().toLocaleDateString('th-TH')}`;
+      modalSaveLayer.classList.remove('hidden');
+    });
+
+    formSaveLayer.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const layerName = document.getElementById('save-layer-name').value.trim();
       if (!layerName) return;
 
+      const formData = new FormData(formSaveLayer);
+      const customProps = {};
+      for (const [k, v] of formData.entries()) {
+        if (k !== 'save-layer-name' && v.trim() !== '') {
+          customProps[k] = v.trim();
+        }
+      }
+
+      const geojson = tempDrawingGroup.toGeoJSON();
+      geojson.features.forEach(f => {
+        f.properties = { ...f.properties, ...customProps, layer_name: layerName };
+      });
+
+      modalSaveLayer.classList.add('hidden');
       document.getElementById('loading-overlay').style.display = 'flex';
 
       const newRecord = {
@@ -1127,7 +1230,7 @@
           if (cells.length >= 2) {
             const key = cells[0].textContent.trim();
             const val = cells[1].textContent.trim();
-            if (key && val) extracted[key] = val;
+            if (key && val && key.length < 40) extracted[key] = val;
           }
         });
       } catch (e) {
@@ -1136,20 +1239,28 @@
       return extracted;
     }
 
+    // ฟังก์ชันอัปเดตตัวเลือก Dropdown Label พร้อม Clean & Filter คีย์สไตล์ KML ป้องกัน UI ล้น
     function updateLabelDropdownOptions(layerRecord) {
       const selectElem = document.getElementById(`sel_label_${layerRecord.id}`);
       if (!selectElem) return;
 
       const propertyKeySet = new Set();
+      const ignoredKeys = ['description', 'styleurl', 'stylehash', 'stroke', 'stroke-width', 'stroke-opacity', 'fill', 'fill-opacity', 'style_url'];
+
       if (layerRecord.geoJSON && layerRecord.geoJSON.features) {
         layerRecord.geoJSON.features.forEach(f => {
           if (f.properties) {
             Object.keys(f.properties).forEach(k => {
-              if (k.toLowerCase() !== 'description') propertyKeySet.add(k);
+              const lower = k.toLowerCase().trim();
+              if (!ignoredKeys.includes(lower) && k.length < 40) {
+                propertyKeySet.add(k);
+              }
             });
             if (f.properties.description && typeof f.properties.description === 'string') {
               const parsed = extractPropertiesFromHTMLDescription(f.properties.description);
-              Object.keys(parsed).forEach(k => propertyKeySet.add(k));
+              Object.keys(parsed).forEach(k => {
+                if (k.length < 40) propertyKeySet.add(k);
+              });
             }
           }
         });
@@ -1158,13 +1269,13 @@
       let optionsHtml = '<option value="">-- ไม่แสดงตัวหนังสือ --</option>';
       Array.from(propertyKeySet).forEach(key => {
         const selected = layerRecord.style?.labelField === key ? 'selected' : '';
-        optionsHtml += `<option value="${key}" ${selected}>${key}</option>`;
+        const displayLabel = key.length > 25 ? key.substring(0, 25) + '...' : key;
+        optionsHtml += `<option value="${key}" ${selected}>${displayLabel}</option>`;
       });
 
       selectElem.innerHTML = optionsHtml;
     }
 
-    // สร้าง Layer Card UI แบบ Bento Box ชิปวงกลม และสวิตช์ iOS
     function createLayerCardUI(layerRecord, leafletLayer) {
       const card = document.createElement('div');
       card.className = 'layer-card p-3.5 bg-slate-50 border border-slate-200/80 rounded-2xl space-y-2.5 text-xs shadow-sm hover:shadow-md transition';
@@ -1202,7 +1313,7 @@
         <div class="style-panel hidden pt-2.5 border-t border-slate-200 space-y-2.5" id="pnl_${layerRecord.id}">
           <div class="flex items-center justify-between">
             <label class="text-slate-600 font-medium">แสดงข้อความ</label>
-            <select id="sel_label_${layerRecord.id}" class="p-1.5 bg-white border border-slate-200 rounded-xl text-[11px] font-medium text-slate-700 max-w-[170px] truncate">
+            <select id="sel_label_${layerRecord.id}" class="p-1.5 bg-white border border-slate-200 rounded-xl text-[11px] font-medium text-slate-700 max-w-[180px] truncate">
               <option value="">-- ไม่แสดงตัวหนังสือ --</option>
             </select>
           </div>
@@ -1588,13 +1699,13 @@
             createLayerCardUI(layerMeta, clusterGroup);
           });
 
-          // ปิด Loading Overlay ทันทีหลังดึง Metadata ครบ เพื่อเพิ่มความเร็วหน้าเว็บ!
+          // ปิด Loading Overlay ทันทีเพื่อความเร็ว
           document.getElementById('loading-overlay').style.display = 'none';
 
           const allBounds = L.latLngBounds([]);
           let loadedCount = 0;
 
-          // ดึงพิกัดเรขาคณิต GeoJSON แยกตามชั้นข้อมูลในพื้นหลังแบบ Asynchronous
+          // ดึงพิกัดเรขาคณิตแบบ Asynchronous ในพื้นหลัง
           metadataList.forEach(async (layerMeta) => {
             try {
               const geoRes = await apiFetch({ action: 'getSingleLayer', layerId: layerMeta.id });
