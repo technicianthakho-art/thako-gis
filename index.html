@@ -213,7 +213,7 @@
       <button id="btn-tool-area" class="p-2.5 text-slate-700 hover:bg-white hover:text-brand-600 rounded-xl transition flex items-center justify-center" title="คำนวณพื้นที่">
         <i data-lucide="pentagon" class="w-5 h-5"></i>
       </button>
-      <button id="btn-tool-export" class="p-2.5 text-emerald-600 hover:bg-emerald-50 rounded-xl transition flex items-center justify-center" title="ดาวน์โหลด GeoJSON">
+      <button id="btn-tool-export" class="p-2.5 text-emerald-600 hover:bg-emerald-50 rounded-xl transition flex items-center justify-center" title="ดาวน์โหลด GeoJSON ชั่วคราว">
         <i data-lucide="download" class="w-5 h-5"></i>
       </button>
       <button id="btn-tool-save-layer" class="p-2.5 text-indigo-600 hover:bg-indigo-50 rounded-xl transition flex items-center justify-center" title="จัดเก็บลง Google Drive">
@@ -834,7 +834,7 @@
       if (activePoints.length > 0) {
         activePoints.pop();
         const lastMarker = vertexMarkers.pop();
-        if (lastMarker) map.removeLayer(lastMarker);
+        if (lastMarker) tempDrawingGroup.removeLayer(lastMarker);
         recalculateShape();
         showToast('ย้อนกลับจุดล่าสุดเรียบร้อยแล้ว', 'info');
       }
@@ -892,19 +892,22 @@
 
       const vMarker = L.circleMarker([lat, lng], {
         radius: 5, color: '#ffffff', fillColor: activeToolMode === 'measure' ? '#ef4444' : '#10b981', fillOpacity: 1, weight: 2
-      }).addTo(map);
+      });
+      tempDrawingGroup.addLayer(vMarker);
       vertexMarkers.push(vMarker);
 
       recalculateShape();
     });
 
+    // แก้ไขจุดสำคัญ: ให้รูปวาดเส้น/พื้นที่ ถูกเพิ่มลงใน tempDrawingGroup เสมอ เพื่อให้ปุ่มบันทึกลง Drive ทำงานได้ 100%
     function recalculateShape() {
       const content = document.getElementById('dock-content');
 
       if (activeToolMode === 'measure') {
         if (!activeLine) {
-          activeLine = L.polyline(activePoints.map(p => [p[1], p[0]]), { color: '#ef4444', weight: 4, dashArray: '6, 6' }).addTo(map);
+          activeLine = L.polyline(activePoints.map(p => [p[1], p[0]]), { color: '#ef4444', weight: 4, dashArray: '6, 6' });
           activeLine.feature = { type: 'Feature', properties: { name: 'เส้นวัดระยะทาง' }, geometry: { type: 'LineString', coordinates: activePoints } };
+          tempDrawingGroup.addLayer(activeLine);
         } else {
           activeLine.setLatLngs(activePoints.map(p => [p[1], p[0]]));
           activeLine.feature.geometry.coordinates = activePoints;
@@ -923,8 +926,9 @@
         if (activePoints.length >= 3) {
           const polyCoords = [...activePoints, activePoints[0]];
           if (!activePolygon) {
-            activePolygon = L.polygon(polyCoords.map(p => [p[1], p[0]]), { color: '#10b981', fillColor: '#34d399', fillOpacity: 0.4 }).addTo(map);
+            activePolygon = L.polygon(polyCoords.map(p => [p[1], p[0]]), { color: '#10b981', fillColor: '#34d399', fillOpacity: 0.4 });
             activePolygon.feature = { type: 'Feature', properties: { name: 'แปลงคำนวณพื้นที่' }, geometry: { type: 'Polygon', coordinates: [polyCoords] } };
+            tempDrawingGroup.addLayer(activePolygon);
           } else {
             activePolygon.setLatLngs(polyCoords.map(p => [p[1], p[0]]));
             activePolygon.feature.geometry.coordinates = [polyCoords];
@@ -957,15 +961,20 @@
         return;
       }
 
-      const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(geojson, null, 2));
+      downloadGeoJSONFile(geojson, `gis_temp_export_${Date.now()}.geojson`);
+      showToast('ส่งออกไฟล์ GeoJSON ชั่วคราวเรียบร้อยแล้ว', 'success');
+    });
+
+    // ฟังก์ชันช่วยดาวน์โหลด GeoJSON ลงเครื่องผู้ใช้
+    function downloadGeoJSONFile(geojsonObject, fileName) {
+      const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(geojsonObject, null, 2));
       const a = document.createElement('a');
       a.setAttribute("href", dataStr);
-      a.setAttribute("download", `gis_export_${Date.now()}.geojson`);
+      a.setAttribute("download", fileName);
       document.body.appendChild(a);
       a.click();
       a.remove();
-      showToast('ส่งออกไฟล์ GeoJSON เรียบร้อยแล้ว', 'success');
-    });
+    }
 
     document.getElementById('btn-tool-save-layer').addEventListener('click', async () => {
       if (!isAdminLoggedIn) {
@@ -1141,6 +1150,7 @@
       selectElem.innerHTML = optionsHtml;
     }
 
+    // สร้าง Layer Card พร้อมปุ่มดาวน์โหลดไฟล์ GeoJSON ถาวรลงเครื่อง (📥)
     function createLayerCardUI(layerRecord, leafletLayer) {
       const card = document.createElement('div');
       card.className = 'layer-card p-3 bg-slate-50 border border-slate-200 rounded-2xl space-y-2 text-xs';
@@ -1160,6 +1170,7 @@
           <div class="flex items-center gap-1">
             <button class="p-1 hover:bg-slate-200 rounded-lg text-slate-600" id="style_${layerRecord.id}" title="ปรับแต่งสไตล์">🎨</button>
             <button class="p-1 hover:bg-slate-200 rounded-lg text-slate-600" id="zoom_${layerRecord.id}" title="ขยายไปยังพื้นที่">🔍</button>
+            <button class="p-1 hover:bg-slate-200 rounded-lg text-emerald-600" id="download_${layerRecord.id}" title="ดาวน์โหลดชั้นข้อมูลนี้เป็น GeoJSON">📥</button>
             <button class="p-1 hover:bg-slate-200 rounded-lg text-slate-600 admin-only" id="editname_${layerRecord.id}" title="เปลี่ยนชื่อ">✏️</button>
             <button class="p-1 hover:bg-red-100 rounded-lg text-red-600 admin-only" id="del_${layerRecord.id}" title="ลบ">🗑️</button>
           </div>
@@ -1208,6 +1219,7 @@
       const lbl = card.querySelector(`#lbl_${layerRecord.id}`);
       const del = card.querySelector(`#del_${layerRecord.id}`);
       const zoom = card.querySelector(`#zoom_${layerRecord.id}`);
+      const btnDownload = card.querySelector(`#download_${layerRecord.id}`);
       const btnStyle = card.querySelector(`#style_${layerRecord.id}`);
       const btnEditName = card.querySelector(`#editname_${layerRecord.id}`);
       const pnlStyle = card.querySelector(`#pnl_${layerRecord.id}`);
@@ -1218,6 +1230,18 @@
         else map.removeLayer(leafletLayer);
         persistToDrive(layerRecord);
       });
+
+      // ปุ่มดาวน์โหลดชั้นข้อมูลถาวรลงเครื่อง
+      if (btnDownload) {
+        btnDownload.addEventListener('click', () => {
+          if (layerRecord.geoJSON) {
+            downloadGeoJSONFile(layerRecord.geoJSON, `${layerRecord.name}_${layerRecord.id}.geojson`);
+            showToast(`ดาวน์โหลดชั้นข้อมูล "${layerRecord.name}" เรียบร้อยแล้ว`, 'success');
+          } else {
+            showToast('กำลังโหลดข้อมูลชั้นข้อมูล กรุณาลองใหม่อีกครั้ง...', 'error');
+          }
+        });
+      }
 
       if (btnStyle) {
         btnStyle.addEventListener('click', () => pnlStyle.classList.toggle('hidden'));
