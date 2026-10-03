@@ -308,11 +308,11 @@
       <div id="conv-latlon-inputs" class="space-y-2">
         <div>
           <label class="font-semibold text-slate-600">Lat (ละติจูด)</label>
-          <input type="number" step="any" id="conv-lat" placeholder="เช่น 13.7563" class="w-full p-2.5 bg-white border border-slate-200 rounded-2xl outline-none focus:ring-2 focus:ring-brand-500" />
+          <input type="number" step="any" id="conv-lat" placeholder="เช่น 19.526142" class="w-full p-2.5 bg-white border border-slate-200 rounded-2xl outline-none focus:ring-2 focus:ring-brand-500" />
         </div>
         <div>
           <label class="font-semibold text-slate-600">Lon (ลองจิจูด)</label>
-          <input type="number" step="any" id="conv-lon" placeholder="เช่น 100.5018" class="w-full p-2.5 bg-white border border-slate-200 rounded-2xl outline-none focus:ring-2 focus:ring-brand-500" />
+          <input type="number" step="any" id="conv-lon" placeholder="เช่น 99.473648" class="w-full p-2.5 bg-white border border-slate-200 rounded-2xl outline-none focus:ring-2 focus:ring-brand-500" />
         </div>
       </div>
 
@@ -320,17 +320,17 @@
         <div>
           <label class="font-semibold text-slate-600">Zone UTM</label>
           <select id="conv-utm-zone" class="w-full p-2.5 bg-white border border-slate-200 rounded-2xl outline-none focus:ring-2 focus:ring-brand-500">
-            <option value="32647">Zone 47N (ประเทศไทยฝั่งตะวันตก/กลาง)</option>
+            <option value="32647" selected>Zone 47N (ประเทศไทยฝั่งตะวันตก/กลาง/เหนือ)</option>
             <option value="32648">Zone 48N (ประเทศไทยฝั่งตะวันออก/อีสาน)</option>
           </select>
         </div>
         <div>
           <label class="font-semibold text-slate-600">Easting (E)</label>
-          <input type="number" step="any" id="conv-e" placeholder="เช่น 662580" class="w-full p-2.5 bg-white border border-slate-200 rounded-2xl outline-none focus:ring-2 focus:ring-brand-500" />
+          <input type="number" step="any" id="conv-e" placeholder="เช่น 549693" class="w-full p-2.5 bg-white border border-slate-200 rounded-2xl outline-none focus:ring-2 focus:ring-brand-500" />
         </div>
         <div>
           <label class="font-semibold text-slate-600">Northing (N)</label>
-          <input type="number" step="any" id="conv-n" placeholder="เช่น 1521500" class="w-full p-2.5 bg-white border border-slate-200 rounded-2xl outline-none focus:ring-2 focus:ring-brand-500" />
+          <input type="number" step="any" id="conv-n" placeholder="เช่น 2159114" class="w-full p-2.5 bg-white border border-slate-200 rounded-2xl outline-none focus:ring-2 focus:ring-brand-500" />
         </div>
       </div>
 
@@ -362,7 +362,7 @@
         <label class="font-semibold text-slate-600">ระบบพิกัด</label>
         <select id="pin-coord-type" class="w-full p-2.5 bg-white border border-slate-200 rounded-2xl outline-none focus:ring-2 focus:ring-brand-500">
           <option value="latlon">Latitude, Longitude (EPSG:4326)</option>
-          <option value="utm47">UTM Zone 47N (EPSG:32647)</option>
+          <option value="utm47" selected>UTM Zone 47N (EPSG:32647)</option>
           <option value="utm48">UTM Zone 48N (EPSG:32648)</option>
         </select>
       </div>
@@ -370,28 +370,28 @@
       <div id="pin-latlon-inputs" class="space-y-2">
         <div>
           <label class="font-semibold text-slate-600">Latitude (ละติจูด)</label>
-          <input type="number" step="any" id="inp-pin-lat" placeholder="เช่น 13.7563" class="w-full p-2.5 bg-white border border-slate-200 rounded-2xl outline-none focus:ring-2 focus:ring-brand-500" />
+          <input type="number" step="any" id="inp-pin-lat" placeholder="เช่น 19.526142" class="w-full p-2.5 bg-white border border-slate-200 rounded-2xl outline-none focus:ring-2 focus:ring-brand-500" />
         </div>
         <div>
           <label class="font-semibold text-slate-600">Longitude (ลองจิจูด)</label>
-          <input type="number" step="any" id="inp-pin-lon" placeholder="เช่น 100.5018" class="w-full p-2.5 bg-white border border-slate-200 rounded-2xl outline-none focus:ring-2 focus:ring-brand-500" />
+          <input type="number" step="any" id="inp-pin-lon" placeholder="เช่น 99.473648" class="w-full p-2.5 bg-white border border-slate-200 rounded-2xl outline-none focus:ring-2 focus:ring-brand-500" />
         </div>
       </div>
 
       <div id="pin-utm-inputs" class="space-y-2 hidden">
         <div>
           <label class="font-semibold text-slate-600">Easting (E / พิกัดตะวันออก)</label>
-          <input type="number" step="any" id="inp-pin-utm-e" placeholder="เช่น 662580" class="w-full p-2.5 bg-white border border-slate-200 rounded-2xl outline-none focus:ring-2 focus:ring-brand-500" />
+          <input type="number" step="any" id="inp-pin-utm-e" placeholder="เช่น 549693" class="w-full p-2.5 bg-white border border-slate-200 rounded-2xl outline-none focus:ring-2 focus:ring-brand-500" />
         </div>
         <div>
           <label class="font-semibold text-slate-600">Northing (N / พิกัดเหนือ)</label>
-          <input type="number" step="any" id="inp-pin-utm-n" placeholder="เช่น 1521500" class="w-full p-2.5 bg-white border border-slate-200 rounded-2xl outline-none focus:ring-2 focus:ring-brand-500" />
+          <input type="number" step="any" id="inp-pin-utm-n" placeholder="เช่น 2159114" class="w-full p-2.5 bg-white border border-slate-200 rounded-2xl outline-none focus:ring-2 focus:ring-brand-500" />
         </div>
       </div>
 
       <div>
         <label class="font-semibold text-slate-600">ชื่อจุด / หมายเหตุ</label>
-        <input type="text" id="inp-pin-name" placeholder="เช่น จุดตรวจที่ 1" class="w-full p-2.5 bg-white border border-slate-200 rounded-2xl outline-none focus:ring-2 focus:ring-brand-500" />
+        <input type="text" id="inp-pin-name" placeholder="เช่น จุดตรวจที่ 1 อบต.ท่าก๊อ" class="w-full p-2.5 bg-white border border-slate-200 rounded-2xl outline-none focus:ring-2 focus:ring-brand-500" />
       </div>
 
       <button id="btn-submit-pin" class="w-full py-2.5 bg-brand-600 hover:bg-brand-700 text-white rounded-2xl font-bold shadow-md transition">ปักหมุดพิกัดนี้</button>
@@ -586,8 +586,9 @@
       });
     }
 
+    // กำหนดค่าตำแหน่งเริ่มต้นให้โฟกัสที่ อบต.ท่าก๊อ อ.แม่สรวย จ.เชียงราย (Lat: 19.526142, Lon: 99.473648, Zoom: 11.5)
     const CONFIG = {
-      studyArea: { center: [13.7563, 100.5018], zoom: 12 },
+      studyArea: { center: [19.526142, 99.473648], zoom: 11.5 },
       baseLayers: {
         osm: L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19, attribution: '&copy; OpenStreetMap' }),
         googleSatellite: L.tileLayer('https://mt1.google.com/vt/lyrs=s&x={x}&y={y}&z={z}', { maxZoom: 20, attribution: '&copy; Google' }),
@@ -1702,7 +1703,6 @@
           // ปิด Loading Overlay ทันทีเพื่อความเร็ว
           document.getElementById('loading-overlay').style.display = 'none';
 
-          const allBounds = L.latLngBounds([]);
           let loadedCount = 0;
 
           // ดึงพิกัดเรขาคณิตแบบ Asynchronous ในพื้นหลัง
@@ -1718,13 +1718,8 @@
 
                   updateLabelDropdownOptions(layerObj.record);
 
-                  const bounds = attachGeoJSONToCluster(layerObj.record, geoRes.geoJSON, layerObj.leafletLayer);
-                  if (bounds && bounds.isValid()) allBounds.extend(bounds);
+                  attachGeoJSONToCluster(layerObj.record, geoRes.geoJSON, layerObj.leafletLayer);
                 }
-              }
-
-              if (loadedCount === metadataList.length && allBounds.isValid()) {
-                map.fitBounds(allBounds, { padding: [40, 40] });
               }
             } catch (e) {
               console.error("Layer load err", e);
