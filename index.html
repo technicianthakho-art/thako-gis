@@ -526,12 +526,13 @@
       return await response.json();
     }
 
-    const HIGHWAY_APP_BASE_URL = "https://script.google.com/macros/s/AKfycbyv1XpHjf3bgPS0DRWOLxfcj_gl6xji6Ve87KwgTQ4mfCnRCeil7e7OsYi3r5oc5J5c1w/exec";
+    // อัปเดตลิงก์ไปยังแอปพลิเคชันทางหลวงท้องถิ่นตัวใหม่บน GitHub Pages
+    const HIGHWAY_APP_BASE_URL = "https://technicianthakho-art.github.io/thakho-highway-gis/";
 
     function openHighwayApp(roadCode = '') {
       let targetUrl = HIGHWAY_APP_BASE_URL;
       if (roadCode) {
-        targetUrl += `?code=${encodeURIComponent(roadCode)}&action=drive`;
+        targetUrl += `?code=${encodeURIComponent(roadCode)}`;
       }
       window.open(targetUrl, '_blank');
     }
@@ -1335,7 +1336,7 @@
       selectElem.innerHTML = optionsHtml;
     }
 
-    // ปรับเปลี่ยนโครงสร้างการ์ดชั้นข้อมูลใหม่ (Vertical Stack Design): แยกสวิตช์+ชื่อ ไว้บรรทัดบน / Badge+ปุ่ม ไว้บรรทัดล่าง
+    // โครงสร้างการ์ดชั้นข้อมูลแบบ Vertical Stack Design
     function createLayerCardUI(layerRecord, leafletLayer) {
       const card = document.createElement('div');
       card.className = 'layer-card p-3.5 bg-slate-50 border border-slate-200/80 rounded-2xl space-y-2.5 text-xs sm:text-sm shadow-sm hover:shadow-md transition';
