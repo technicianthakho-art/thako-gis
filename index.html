@@ -28,7 +28,7 @@
     }
   </script>
 
-  <!-- Google Fonts: Sarabun (ฟอนต์มีหัว อ่านง่าย เหมาะกับงานราชการ) -->
+  <!-- Google Fonts: Sarabun -->
   <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 
   <!-- Leaflet CSS & JS -->
@@ -56,13 +56,13 @@
     * { box-sizing: border-box; font-family: 'Sarabun', -apple-system, sans-serif; -webkit-tap-highlight-color: transparent; }
     body, html { height: 100%; width: 100%; overflow: hidden; }
 
-    /* Frosted Glass Modern Styling */
+    /* Frosted Glass Base Styling */
     .glass-card {
       background: rgba(255, 255, 255, 0.88);
       backdrop-filter: blur(20px);
       -webkit-backdrop-filter: blur(20px);
       border: 1px solid rgba(255, 255, 255, 0.8);
-      box-shadow: 0 20px 40px -15px rgba(15, 23, 42, 0.12);
+      box-shadow: 0 15px 35px -10px rgba(15, 23, 42, 0.15);
     }
 
     .cursor-pin { cursor: crosshair !important; }
@@ -152,13 +152,40 @@
     .btn-popup-save { background: #10b981; color: white; border: none; padding: 10px; border-radius: 12px; font-size: 0.85rem; font-weight: 700; width: 100%; margin-top: 6px; cursor: pointer; transition: all 0.2s; box-shadow: 0 4px 12px rgba(16, 185, 129, 0.25); }
     .btn-popup-save:hover { background: #059669; }
 
-    /* iOS Style Toggle Switch สำหรับ Sidebar */
+    /* iOS Style Toggle Switch */
     .ios-switch { position: relative; inline-size: 38px; block-size: 22px; display: inline-block; }
     .ios-switch input { opacity: 0; width: 0; height: 0; }
     .ios-slider { position: absolute; cursor: pointer; inset: 0; background-color: #cbd5e1; transition: .3s; border-radius: 9999px; }
     .ios-slider:before { position: absolute; content: ""; height: 16px; width: 16px; left: 3px; bottom: 3px; background-color: white; transition: .3s; border-radius: 50%; box-shadow: 0 2px 4px rgba(0,0,0,0.2); }
     input:checked + .ios-slider { background-color: #4f46e5; }
     input:checked + .ios-slider:before { transform: translateX(16px); }
+
+    /* Custom Instant Tooltip Styling */
+    .nav-tooltip {
+      position: absolute;
+      top: 100%;
+      margin-top: 8px;
+      left: 50%;
+      transform: translateX(-50%);
+      white-space: nowrap;
+      background: rgba(15, 23, 42, 0.95);
+      backdrop-filter: blur(8px);
+      color: #ffffff;
+      font-size: 0.75rem;
+      font-weight: 600;
+      padding: 6px 12px;
+      border-radius: 12px;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3);
+      opacity: 0;
+      pointer-events: none;
+      transition: all 0.15s ease-out;
+      z-index: 1050;
+    }
+    .group:hover .nav-tooltip {
+      opacity: 1;
+      transform: translateX(-50%) translateY(2px);
+    }
   </style>
 </head>
 <body class="h-full overflow-hidden bg-slate-900 text-slate-800">
@@ -175,123 +202,135 @@
   <!-- Toast Notification System -->
   <div id="toast-container" class="fixed top-20 left-1/2 -translate-x-1/2 z-[9999] pointer-events-none flex flex-col gap-2"></div>
 
-  <!-- SECTION 1: TOP HEADER NAVIGATION BAR -->
-  <div class="fixed top-4 left-4 sm:left-6 right-4 z-[1000] flex flex-wrap items-center justify-between gap-3 pointer-events-none">
-    <div class="glass-card rounded-full px-5 py-2.5 shadow-2xl pointer-events-auto flex items-center gap-3">
-      <div class="p-2 bg-brand-600 text-white rounded-full shadow-md">
-        <i data-lucide="map-pin" class="w-4 h-4"></i>
-      </div>
-      <h1 id="gis-title" class="font-bold text-slate-900 text-base sm:text-lg leading-none">📍 GIS กองช่าง อบต.ท่าก๊อ</h1>
-    </div>
-
-    <div class="glass-card rounded-full p-1.5 shadow-2xl pointer-events-auto flex items-center gap-2 flex-wrap">
-      <div class="relative group flex items-center">
-        <button id="btn-header-highway" onclick="openHighwayApp()" class="py-2 px-4 bg-emerald-600 hover:bg-emerald-700 text-white rounded-full text-xs sm:text-sm font-bold shadow-md transition-all transform hover:scale-105 flex items-center gap-1.5">
-          <i data-lucide="map" class="w-4 h-4"></i>
-          <span>🛣 ทางหลวงท้องถิ่น</span>
-        </button>
-        <span class="absolute top-full mt-2 left-1/2 -translate-x-1/2 whitespace-nowrap bg-slate-900/90 backdrop-blur-sm text-white text-xs font-medium px-2.5 py-1 rounded-lg shadow-xl opacity-0 pointer-events-none transition-all duration-150 group-hover:opacity-100 z-[1010]">เปิดฐานข้อมูลทางหลวงท้องถิ่น</span>
-      </div>
-
-      <div class="relative group flex items-center">
-        <button id="btn-header-convert" class="py-2 px-4 bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 text-white rounded-full text-xs sm:text-sm font-bold shadow-md transition-all transform hover:scale-105 flex items-center gap-1.5">
-          <i data-lucide="repeat" class="w-4 h-4"></i>
-          <span>🔄 แปลงพิกัด</span>
-        </button>
-        <span class="absolute top-full mt-2 left-1/2 -translate-x-1/2 whitespace-nowrap bg-slate-900/90 backdrop-blur-sm text-white text-xs font-medium px-2.5 py-1 rounded-lg shadow-xl opacity-0 pointer-events-none transition-all duration-150 group-hover:opacity-100 z-[1010]">แปลงค่าพิกัด GIS</span>
-      </div>
-
-      <div class="relative group flex items-center">
-        <button id="btn-header-locate" class="p-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-full text-xs sm:text-sm font-semibold transition-all transform hover:scale-105">
-          <i data-lucide="crosshair" class="w-4 h-4 text-brand-600"></i>
-        </button>
-        <span class="absolute top-full mt-2 left-1/2 -translate-x-1/2 whitespace-nowrap bg-slate-900/90 backdrop-blur-sm text-white text-xs font-medium px-2.5 py-1 rounded-lg shadow-xl opacity-0 pointer-events-none transition-all duration-150 group-hover:opacity-100 z-[1010]">ตำแหน่งปัจจุบัน (GPS)</span>
-      </div>
-
-      <div class="relative group flex items-center">
-        <label id="upload-label" class="py-2 px-4 bg-slate-200 text-slate-400 rounded-full text-xs sm:text-sm font-semibold cursor-not-allowed transition-all flex items-center gap-1.5">
-          <i data-lucide="upload-cloud" class="w-4 h-4"></i>
-          <span class="hidden sm:inline">อัปโหลด</span>
-          <input type="file" id="file-input" accept=".geojson, .json, .kml, .kmz, .zip" disabled class="hidden" />
-        </label>
-        <span class="absolute top-full mt-2 left-1/2 -translate-x-1/2 whitespace-nowrap bg-slate-900/90 backdrop-blur-sm text-white text-xs font-medium px-2.5 py-1 rounded-lg shadow-xl opacity-0 pointer-events-none transition-all duration-150 group-hover:opacity-100 z-[1010]">อัปโหลดไฟล์ (ต้องเข้าสู่ระบบ Admin)</span>
-      </div>
-
-      <div class="relative group flex items-center">
-        <button id="btn-toggle-sidebar" class="py-2 px-4 bg-slate-900 text-white rounded-full hover:bg-slate-800 transition-all transform hover:scale-105 shadow-md flex items-center gap-1.5 text-xs sm:text-sm font-semibold">
-          <i data-lucide="layers" class="w-4 h-4"></i>
-          <span>รายการชั้นข้อมูล</span>
-        </button>
-        <span class="absolute top-full mt-2 left-1/2 -translate-x-1/2 whitespace-nowrap bg-slate-900/90 backdrop-blur-sm text-white text-xs font-medium px-2.5 py-1 rounded-lg shadow-xl opacity-0 pointer-events-none transition-all duration-150 group-hover:opacity-100 z-[1010]">เปิด/ปิด รายการชั้นข้อมูล</span>
-      </div>
-
-      <button id="btn-login" class="py-2 px-4 bg-slate-900 hover:bg-slate-800 text-white rounded-full text-xs sm:text-sm font-semibold shadow-md transition-all transform hover:scale-105 flex items-center gap-1.5">
-        <i data-lucide="key" class="w-4 h-4"></i>
-        <span id="login-text">Admin</span>
-      </button>
+  <!-- SECTION 1: TOP LEFT COMPACT TITLE BAR -->
+  <div class="fixed top-4 left-4 z-[1000] pointer-events-auto">
+    <div class="glass-card rounded-full px-4 py-2 shadow-2xl flex items-center gap-2 border-2 border-white/90">
+      <h1 id="gis-title" class="font-bold text-slate-900 text-base sm:text-lg leading-none flex items-center gap-1.5">
+        📍 <span>อบต.ท่าก๊อ</span>
+      </h1>
     </div>
   </div>
 
-  <!-- SECTION 2: RIGHT ACTION TOOLBAR (INSTANT TOOLTIP) -->
+  <!-- SECTION 2: TOP RIGHT INDIVIDUAL GRADIENT BUTTONS (RIGHT-TO-LEFT ORDER) -->
+  <div class="fixed top-4 right-4 z-[1000] flex items-center gap-2.5 flex-wrap justify-end pointer-events-auto">
+
+    <!-- 1. ปุ่มแอดมิน (ขวาสุด) -->
+    <div class="relative group flex items-center">
+      <button id="btn-login" class="py-2 px-4 bg-gradient-to-r from-slate-800 to-zinc-900 hover:from-slate-900 hover:to-black text-white rounded-full text-xs sm:text-sm font-bold border-2 border-white/90 shadow-lg transition-all transform hover:scale-105 active:scale-95 flex items-center gap-1.5">
+        <i data-lucide="key" class="w-4 h-4 text-amber-400"></i>
+        <span id="login-text">Admin</span>
+      </button>
+      <div class="nav-tooltip">เข้าสู่ระบบผู้ดูแลระบบ (Admin)</div>
+    </div>
+
+    <!-- 2. ปุ่มรายการชั้นข้อมูล -->
+    <div class="relative group flex items-center">
+      <button id="btn-toggle-sidebar" class="py-2 px-4 bg-gradient-to-r from-indigo-600 to-blue-700 hover:from-indigo-700 hover:to-blue-800 text-white rounded-full text-xs sm:text-sm font-bold border-2 border-white/90 shadow-lg transition-all transform hover:scale-105 active:scale-95 flex items-center gap-1.5">
+        <i data-lucide="layers" class="w-4 h-4 text-indigo-200"></i>
+        <span>รายการชั้นข้อมูล</span>
+      </button>
+      <div class="nav-tooltip">เปิด/ปิด รายการชั้นข้อมูลแผนที่</div>
+    </div>
+
+    <!-- 3. ปุ่มทางหลวงท้องถิ่น -->
+    <div class="relative group flex items-center">
+      <button id="btn-header-highway" onclick="openHighwayApp()" class="py-2 px-4 bg-gradient-to-r from-emerald-500 to-teal-700 hover:from-emerald-600 hover:to-teal-800 text-white rounded-full text-xs sm:text-sm font-bold border-2 border-white/90 shadow-lg transition-all transform hover:scale-105 active:scale-95 flex items-center gap-1.5">
+        <i data-lucide="map" class="w-4 h-4 text-emerald-200"></i>
+        <span>🛣 ทางหลวงท้องถิ่น</span>
+      </button>
+      <div class="nav-tooltip">เปิดระบบฐานข้อมูลทางหลวงท้องถิ่น</div>
+    </div>
+
+    <!-- 4. ปุ่มแปลงพิกัด -->
+    <div class="relative group flex items-center">
+      <button id="btn-header-convert" class="py-2 px-4 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white rounded-full text-xs sm:text-sm font-bold border-2 border-white/90 shadow-lg transition-all transform hover:scale-105 active:scale-95 flex items-center gap-1.5">
+        <i data-lucide="repeat" class="w-4 h-4 text-purple-200"></i>
+        <span>🔄 แปลงพิกัด</span>
+      </button>
+      <div class="nav-tooltip">คำนวณแปลงค่าพิกัด Lat/Lon ↔ UTM</div>
+    </div>
+
+    <!-- 5. ปุ่มตำแหน่งปัจจุบัน GPS (ดีไซน์รูปแคปซูลใหม่) -->
+    <div class="relative group flex items-center">
+      <button id="btn-header-locate" class="py-2 px-4 bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700 text-white rounded-full text-xs sm:text-sm font-bold border-2 border-white/90 shadow-lg transition-all transform hover:scale-105 active:scale-95 flex items-center gap-1.5">
+        <i data-lucide="crosshair" class="w-4 h-4 text-cyan-100 animate-pulse"></i>
+        <span>🎯 พิกัด GPS</span>
+      </button>
+      <div class="nav-tooltip">ค้นหาและบินไปยังตำแหน่งปัจจุบันของคุณ</div>
+    </div>
+
+    <!-- 6. ปุ่มอัปโหลดไฟล์ (แสดงเฉพาะเมื่อสิทธิ์ Admin ล็อกอินสำเร็จ - ถัดมาจากปุ่ม GPS ไปทางซ้าย) -->
+    <div id="upload-btn-container" class="relative group hidden items-center">
+      <label id="upload-label" class="py-2 px-4 bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-600 hover:to-orange-700 text-white rounded-full text-xs sm:text-sm font-bold border-2 border-white/90 shadow-lg cursor-pointer transition-all transform hover:scale-105 active:scale-95 flex items-center gap-1.5">
+        <i data-lucide="upload-cloud" class="w-4 h-4 text-amber-100"></i>
+        <span>อัปโหลด</span>
+        <input type="file" id="file-input" accept=".geojson, .json, .kml, .kmz, .zip" disabled class="hidden" />
+      </label>
+      <div class="nav-tooltip">อัปโหลดไฟล์ GIS (KML, KMZ, SHP, GeoJSON)</div>
+    </div>
+
+  </div>
+
+  <!-- SECTION 3: RIGHT SLIM ACTION TOOLBAR -->
   <div class="fixed top-20 right-4 z-[1000] flex flex-col gap-2 pointer-events-auto">
-    <div class="glass-card rounded-full p-2 shadow-2xl flex flex-col gap-2">
+    <div class="glass-card rounded-full px-1.5 py-3 shadow-2xl flex flex-col items-center gap-2.5 border-2 border-white/80">
       
       <!-- ปุ่มปักพิกัดตำแหน่ง -->
       <div class="relative group flex items-center">
-        <button id="btn-tool-coord" class="p-3 text-slate-700 hover:bg-white hover:text-brand-600 rounded-full transition-all transform hover:scale-110 shadow-sm flex items-center justify-center">
+        <button id="btn-tool-coord" class="p-2.5 text-slate-700 hover:bg-brand-50 hover:text-brand-600 rounded-full transition-all transform hover:scale-110 flex items-center justify-center">
           <i data-lucide="map-pin" class="w-5 h-5"></i>
         </button>
-        <span class="absolute right-full mr-3 whitespace-nowrap bg-slate-900/90 backdrop-blur-sm text-white text-xs font-medium px-3 py-1.5 rounded-xl shadow-2xl opacity-0 pointer-events-none transition-all duration-150 group-hover:opacity-100 z-[1010]">
+        <span class="absolute right-full mr-3 whitespace-nowrap bg-slate-900/95 backdrop-blur-sm text-white text-xs font-semibold px-3 py-1.5 rounded-xl shadow-2xl opacity-0 pointer-events-none transition-all duration-150 group-hover:opacity-100 z-[1010] border border-white/20">
           ปักพิกัดตำแหน่ง
         </span>
       </div>
 
       <!-- ปุ่มวัดระยะทาง -->
       <div class="relative group flex items-center">
-        <button id="btn-tool-measure" class="p-3 text-slate-700 hover:bg-white hover:text-brand-600 rounded-full transition-all transform hover:scale-110 shadow-sm flex items-center justify-center">
+        <button id="btn-tool-measure" class="p-2.5 text-slate-700 hover:bg-brand-50 hover:text-brand-600 rounded-full transition-all transform hover:scale-110 flex items-center justify-center">
           <i data-lucide="ruler" class="w-5 h-5"></i>
         </button>
-        <span class="absolute right-full mr-3 whitespace-nowrap bg-slate-900/90 backdrop-blur-sm text-white text-xs font-medium px-3 py-1.5 rounded-xl shadow-2xl opacity-0 pointer-events-none transition-all duration-150 group-hover:opacity-100 z-[1010]">
+        <span class="absolute right-full mr-3 whitespace-nowrap bg-slate-900/95 backdrop-blur-sm text-white text-xs font-semibold px-3 py-1.5 rounded-xl shadow-2xl opacity-0 pointer-events-none transition-all duration-150 group-hover:opacity-100 z-[1010] border border-white/20">
           วัดระยะทาง
         </span>
       </div>
 
       <!-- ปุ่มคำนวณพื้นที่ -->
       <div class="relative group flex items-center">
-        <button id="btn-tool-area" class="p-3 text-slate-700 hover:bg-white hover:text-brand-600 rounded-full transition-all transform hover:scale-110 shadow-sm flex items-center justify-center">
+        <button id="btn-tool-area" class="p-2.5 text-slate-700 hover:bg-brand-50 hover:text-brand-600 rounded-full transition-all transform hover:scale-110 flex items-center justify-center">
           <i data-lucide="pentagon" class="w-5 h-5"></i>
         </button>
-        <span class="absolute right-full mr-3 whitespace-nowrap bg-slate-900/90 backdrop-blur-sm text-white text-xs font-medium px-3 py-1.5 rounded-xl shadow-2xl opacity-0 pointer-events-none transition-all duration-150 group-hover:opacity-100 z-[1010]">
-          คำนวณพื้นที่
+        <span class="absolute right-full mr-3 whitespace-nowrap bg-slate-900/95 backdrop-blur-sm text-white text-xs font-semibold px-3 py-1.5 rounded-xl shadow-2xl opacity-0 pointer-events-none transition-all duration-150 group-hover:opacity-100 z-[1010] border border-white/20">
+          คำนวณพื้นที่ (ไร่-งาน-วา)
         </span>
       </div>
 
       <!-- ปุ่มดาวน์โหลด GeoJSON ชั่วคราว -->
       <div class="relative group flex items-center">
-        <button id="btn-tool-export" class="p-3 text-emerald-600 hover:bg-emerald-50 rounded-full transition-all transform hover:scale-110 shadow-sm flex items-center justify-center">
+        <button id="btn-tool-export" class="p-2.5 text-emerald-600 hover:bg-emerald-50 rounded-full transition-all transform hover:scale-110 flex items-center justify-center">
           <i data-lucide="download" class="w-5 h-5"></i>
         </button>
-        <span class="absolute right-full mr-3 whitespace-nowrap bg-slate-900/90 backdrop-blur-sm text-white text-xs font-medium px-3 py-1.5 rounded-xl shadow-2xl opacity-0 pointer-events-none transition-all duration-150 group-hover:opacity-100 z-[1010]">
+        <span class="absolute right-full mr-3 whitespace-nowrap bg-slate-900/95 backdrop-blur-sm text-white text-xs font-semibold px-3 py-1.5 rounded-xl shadow-2xl opacity-0 pointer-events-none transition-all duration-150 group-hover:opacity-100 z-[1010] border border-white/20">
           ดาวน์โหลด GeoJSON ชั่วคราว
         </span>
       </div>
 
       <!-- ปุ่มจัดเก็บลง Google Drive -->
       <div class="relative group flex items-center">
-        <button id="btn-tool-save-layer" class="p-3 text-indigo-600 hover:bg-indigo-50 rounded-full transition-all transform hover:scale-110 shadow-sm flex items-center justify-center">
+        <button id="btn-tool-save-layer" class="p-2.5 text-indigo-600 hover:bg-indigo-50 rounded-full transition-all transform hover:scale-110 flex items-center justify-center">
           <i data-lucide="save" class="w-5 h-5"></i>
         </button>
-        <span class="absolute right-full mr-3 whitespace-nowrap bg-slate-900/90 backdrop-blur-sm text-white text-xs font-medium px-3 py-1.5 rounded-xl shadow-2xl opacity-0 pointer-events-none transition-all duration-150 group-hover:opacity-100 z-[1010]">
+        <span class="absolute right-full mr-3 whitespace-nowrap bg-slate-900/95 backdrop-blur-sm text-white text-xs font-semibold px-3 py-1.5 rounded-xl shadow-2xl opacity-0 pointer-events-none transition-all duration-150 group-hover:opacity-100 z-[1010] border border-white/20">
           จัดเก็บลง Google Drive
         </span>
       </div>
 
       <!-- ปุ่มล้างหมุด/รูปวาดชั่วคราว -->
       <div class="relative group flex items-center">
-        <button id="btn-tool-clear" class="p-3 text-red-500 hover:bg-red-50 rounded-full transition-all transform hover:scale-110 shadow-sm flex items-center justify-center">
+        <button id="btn-tool-clear" class="p-2.5 text-red-500 hover:bg-red-50 rounded-full transition-all transform hover:scale-110 flex items-center justify-center">
           <i data-lucide="trash-2" class="w-5 h-5"></i>
         </button>
-        <span class="absolute right-full mr-3 whitespace-nowrap bg-slate-900/90 backdrop-blur-sm text-white text-xs font-medium px-3 py-1.5 rounded-xl shadow-2xl opacity-0 pointer-events-none transition-all duration-150 group-hover:opacity-100 z-[1010]">
+        <span class="absolute right-full mr-3 whitespace-nowrap bg-slate-900/95 backdrop-blur-sm text-white text-xs font-semibold px-3 py-1.5 rounded-xl shadow-2xl opacity-0 pointer-events-none transition-all duration-150 group-hover:opacity-100 z-[1010] border border-white/20">
           ล้างหมุด/รูปวาดชั่วคราว
         </span>
       </div>
@@ -299,7 +338,7 @@
     </div>
   </div>
 
-  <!-- SECTION 3: SIDEBAR LAYER DRAWER -->
+  <!-- SECTION 4: SIDEBAR LAYER DRAWER -->
   <aside id="sidebar" class="fixed top-4 right-4 bottom-4 h-[calc(100vh-32px)] w-[340px] max-w-[85vw] bg-white/95 backdrop-blur-2xl z-[1005] shadow-2xl rounded-3xl border border-white/80 translate-x-[360px] transition-transform duration-300 flex flex-col overflow-hidden">
     <div class="p-4 border-b border-slate-100 flex items-center justify-between font-bold text-slate-900 text-sm">
       <span class="flex items-center gap-2"><i data-lucide="layers" class="w-4 h-4 text-brand-600"></i> รายการชั้นข้อมูล</span>
@@ -329,7 +368,7 @@
     </div>
   </aside>
 
-  <!-- SECTION 4: BOTTOM FLOATING DOCK -->
+  <!-- SECTION 5: BOTTOM FLOATING DOCK -->
   <div id="bottom-tool-dock" class="fixed bottom-6 left-1/2 -translate-x-1/2 z-[1000] pointer-events-auto hidden transition-all duration-300">
     <div class="glass-card rounded-3xl p-5 shadow-2xl border border-white/80 max-w-md w-[90vw] sm:w-[420px] flex flex-col gap-2.5 text-xs sm:text-sm">
       <div class="flex items-center justify-between font-bold text-slate-800 border-b border-slate-200/60 pb-2">
@@ -347,7 +386,7 @@
     </div>
   </div>
 
-  <!-- SECTION 5: MODALS -->
+  <!-- SECTION 6: MODALS -->
   <div id="modal-convert" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-[9000] flex items-center justify-center p-4 hidden">
     <div class="glass-card rounded-3xl p-6 w-full max-w-sm shadow-2xl space-y-4 border border-white/80 text-xs sm:text-sm">
       <div class="flex items-center justify-between font-bold text-slate-900 text-sm sm:text-base border-b pb-2">
@@ -456,7 +495,7 @@
     </div>
   </div>
 
-  <!-- SECTION 6: MODAL SAVE LAYER WITH DEFAULT ATTRIBUTE TEMPLATE -->
+  <!-- SECTION 7: MODAL SAVE LAYER -->
   <div id="modal-save-layer" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-[9000] flex items-center justify-center p-4 hidden">
     <div class="glass-card rounded-3xl p-6 w-full max-w-md shadow-2xl space-y-3.5 border border-white/80 text-xs sm:text-sm max-h-[90vh] overflow-y-auto">
       <div class="flex items-center justify-between font-bold text-slate-900 text-sm sm:text-base border-b pb-2">
@@ -475,9 +514,7 @@
           <div class="text-xs text-slate-600 leading-relaxed">กรอกข้อมูลเฉพาะช่องที่ต้องการ ไม่บังคับกรอกทุกช่อง</div>
         </div>
 
-        <div id="save-template-fields" class="space-y-2.5">
-          <!-- Dynamic Form Fields Generated via JS -->
-        </div>
+        <div id="save-template-fields" class="space-y-2.5"></div>
 
         <div class="pt-2 flex gap-2">
           <button type="button" id="btn-cancel-save-layer" class="flex-1 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-2xl font-bold transition">ยกเลิก</button>
@@ -487,7 +524,7 @@
     </div>
   </div>
 
-  <!-- SECTION 7: ADMIN LOGIN MODAL -->
+  <!-- SECTION 8: ADMIN LOGIN MODAL -->
   <div id="modal-admin-login" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-[9000] flex items-center justify-center p-4 hidden">
     <div class="glass-card rounded-3xl p-6 w-full max-w-sm shadow-2xl space-y-4 border border-white/80">
       <div class="flex items-center justify-between font-bold text-slate-900 text-sm sm:text-base border-b pb-2">
@@ -504,12 +541,11 @@
     </div>
   </div>
 
-  <!-- SECTION 8: JAVASCRIPT LOGIC ENGINE -->
+  <!-- SECTION 9: JAVASCRIPT LOGIC ENGINE -->
   <script>
-    // URL ของ REST API บน Google Apps Script
+    // REST API Endpoint บน Google Apps Script
     const API_URL = "https://script.google.com/macros/s/AKfycbyz6Am3mNYcM_LqgTBo7bOMyXuN9cAC3vbbcILLjHhxwBx3_vWP2Xdk5V5IFRrXYlhlow/exec";
 
-    // REST API Wrapper
     async function apiFetch(params, method = 'GET', bodyData = null) {
       let url = API_URL;
       if (method === 'GET' && params) {
@@ -526,7 +562,6 @@
       return await response.json();
     }
 
-    // อัปเดตลิงก์ไปยังแอปพลิเคชันทางหลวงท้องถิ่นตัวใหม่บน GitHub Pages
     const HIGHWAY_APP_BASE_URL = "https://technicianthakho-art.github.io/thakho-highway-gis/";
 
     function openHighwayApp(roadCode = '') {
@@ -579,20 +614,22 @@
 
     const btnLogin = document.getElementById('btn-login');
     const loginText = document.getElementById('login-text');
-    const uploadLabel = document.getElementById('upload-label');
+    const uploadBtnContainer = document.getElementById('upload-btn-container');
     const fileInput = document.getElementById('file-input');
     const modalLogin = document.getElementById('modal-admin-login');
 
     function applyAdminState() {
       if (isAdminLoggedIn) {
         loginText.textContent = 'Log out';
-        btnLogin.className = 'py-2 px-4 bg-red-600 hover:bg-red-700 text-white rounded-full text-xs sm:text-sm font-semibold shadow-md transition-all transform hover:scale-105 flex items-center gap-1.5';
-        uploadLabel.className = 'py-2 px-4 bg-brand-600 hover:bg-brand-700 text-white rounded-full text-xs sm:text-sm font-semibold shadow-md cursor-pointer transition-all transform hover:scale-105 flex items-center gap-1.5';
+        btnLogin.className = 'py-2 px-4 bg-gradient-to-r from-red-600 to-rose-700 hover:from-red-700 hover:to-rose-800 text-white rounded-full text-xs sm:text-sm font-bold border-2 border-white/90 shadow-lg transition-all transform hover:scale-105 active:scale-95 flex items-center gap-1.5';
+        uploadBtnContainer.classList.remove('hidden');
+        uploadBtnContainer.classList.add('flex');
         fileInput.disabled = false;
       } else {
         loginText.textContent = 'Admin';
-        btnLogin.className = 'py-2 px-4 bg-slate-900 hover:bg-slate-800 text-white rounded-full text-xs sm:text-sm font-semibold shadow-md transition-all transform hover:scale-105 flex items-center gap-1.5';
-        uploadLabel.className = 'py-2 px-4 bg-slate-200 text-slate-400 rounded-full text-xs sm:text-sm font-semibold cursor-not-allowed transition-all flex items-center gap-1.5';
+        btnLogin.className = 'py-2 px-4 bg-gradient-to-r from-slate-800 to-zinc-900 hover:from-slate-900 hover:to-black text-white rounded-full text-xs sm:text-sm font-bold border-2 border-white/90 shadow-lg transition-all transform hover:scale-105 active:scale-95 flex items-center gap-1.5';
+        uploadBtnContainer.classList.add('hidden');
+        uploadBtnContainer.classList.remove('flex');
         fileInput.disabled = true;
       }
       refreshUIState();
@@ -645,7 +682,6 @@
       });
     }
 
-    // กำหนดค่าตำแหน่งเริ่มต้นให้โฟกัสที่ อบต.ท่าก๊อ อ.แม่สรวย จ.เชียงราย (Lat: 19.526142, Lon: 99.473648, Zoom: 11.5)
     const CONFIG = {
       studyArea: { center: [19.526142, 99.473648], zoom: 11.5 },
       baseLayers: {
@@ -1081,7 +1117,6 @@
       a.remove();
     }
 
-    // --- Modal Save Layer Management ---
     const modalSaveLayer = document.getElementById('modal-save-layer');
     const formSaveLayer = document.getElementById('form-save-layer');
     const saveTemplateFieldsContainer = document.getElementById('save-template-fields');
@@ -1101,8 +1136,6 @@
         return;
       }
 
-      // ตรวจสอบประเภทการวาดหลัก
-      let detectType = 'GEOJSON';
       let templateHtml = '';
 
       if (activeToolMode === 'measure') {
@@ -1116,7 +1149,7 @@
           <div><label class="font-semibold text-slate-600">ประเภทผิวจราจร</label><input type="text" name="surface_type" placeholder="เช่น ถนน คสล., ถนนลูกรัง" class="w-full p-2 bg-white border border-slate-200 rounded-xl"></div>
           <div><label class="font-semibold text-slate-600">ความกว้าง (เมตร)</label><input type="text" name="width" placeholder="เช่น 4.00" class="w-full p-2 bg-white border border-slate-200 rounded-xl"></div>
           <div><label class="font-semibold text-slate-600">ความยาว (คำนวณอัตโนมัติ)</label><input type="text" name="length" value="${distM} เมตร (${distKm.toFixed(3)} กม.)" readonly class="w-full p-2 bg-slate-100 border border-slate-200 rounded-xl font-bold text-slate-700"></div>
-          <div><label class="font-semibold text-slate-600">บันทึกข้อความ (จดช่วยจำ)</label><textarea name="memo" rows="2" placeholder="เช่น ผิวจราจรเป็นหลุมขนมครก ช่วงต้นสาย..." class="w-full p-2 bg-white border border-slate-200 rounded-xl"></textarea></div>
+          <div><label class="font-semibold text-slate-600">บันทึกข้อความ (จดช่วยจำ)</label><textarea name="memo" rows="2" placeholder="เช่น ผิวจราจรเป็นหลุมขนมครก..." class="w-full p-2 bg-white border border-slate-200 rounded-xl"></textarea></div>
           <div><label class="font-semibold text-slate-600">หมายเหตุ</label><input type="text" name="remark" placeholder="เช่น บรรจุแผนพัฒนาท้องถิ่นปี 2570" class="w-full p-2 bg-white border border-slate-200 rounded-xl"></div>
         `;
       } else if (activeToolMode === 'area') {
@@ -1132,14 +1165,14 @@
           <div><label class="font-semibold text-slate-600">หมู่ที่ / ชื่อหมู่บ้าน</label><input type="text" name="village" placeholder="เช่น หมู่ที่ 2 บ้านท่าก๊อ" class="w-full p-2 bg-white border border-slate-200 rounded-xl"></div>
           <div><label class="font-semibold text-slate-600">การใช้ประโยชน์</label><input type="text" name="use_type" placeholder="เช่น ที่สาธารณประโยชน์, อาคารราชการ" class="w-full p-2 bg-white border border-slate-200 rounded-xl"></div>
           <div><label class="font-semibold text-slate-600">ขนาดพื้นที่ (คำนวณอัตโนมัติ)</label><input type="text" name="area_thai" value="${rai} ไร่ ${ngan} งาน ${sqwa} ตร.วา (${areaSqm.toFixed(2)} ตร.ม.)" readonly class="w-full p-2 bg-slate-100 border border-slate-200 rounded-xl font-bold text-slate-700"></div>
-          <div><label class="font-semibold text-slate-600">บันทึกข้อความ (จดช่วยจำ)</label><textarea name="memo" rows="2" placeholder="เช่น เป็นพื้นที่ลุ่มต่ำ มีสิ่งปลูกสร้างรุกล้ำ 1 หลัง..." class="w-full p-2 bg-white border border-slate-200 rounded-xl"></textarea></div>
+          <div><label class="font-semibold text-slate-600">บันทึกข้อความ (จดช่วยจำ)</label><textarea name="memo" rows="2" placeholder="เช่น เป็นพื้นที่ลุ่มต่ำ..." class="w-full p-2 bg-white border border-slate-200 rounded-xl"></textarea></div>
           <div><label class="font-semibold text-slate-600">หมายเหตุ</label><input type="text" name="remark" placeholder="เช่น มีหนังสือ นสล." class="w-full p-2 bg-white border border-slate-200 rounded-xl"></div>
         `;
       } else {
         templateHtml = `
           <div><label class="font-semibold text-slate-600">หมู่ที่ / ชื่อหมู่บ้าน</label><input type="text" name="village" placeholder="เช่น หมู่ที่ 5 บ้านท่าก๊อ" class="w-full p-2 bg-white border border-slate-200 rounded-xl"></div>
           <div><label class="font-semibold text-slate-600">หมวดหมู่ / ประเภท</label><input type="text" name="category" placeholder="เช่น ไฟฟ้าสาธารณะ, ร้องเรียน" class="w-full p-2 bg-white border border-slate-200 rounded-xl"></div>
-          <div><label class="font-semibold text-slate-600">บันทึกข้อความ (จดช่วยจำ)</label><textarea name="memo" rows="2" placeholder="เช่น โคมไฟชำรุด, เสาเอียง..." class="w-full p-2 bg-white border border-slate-200 rounded-xl"></textarea></div>
+          <div><label class="font-semibold text-slate-600">บันทึกข้อความ (จดช่วยจำ)</label><textarea name="memo" rows="2" placeholder="เช่น โคมไฟชำรุด..." class="w-full p-2 bg-white border border-slate-200 rounded-xl"></textarea></div>
           <div><label class="font-semibold text-slate-600">หมายเหตุ</label><input type="text" name="remark" placeholder="เช่น รอจัดซื้องบปี 2570" class="w-full p-2 bg-white border border-slate-200 rounded-xl"></div>
         `;
       }
@@ -1299,7 +1332,6 @@
       return extracted;
     }
 
-    // ฟังก์ชันอัปเดตตัวเลือก Dropdown Label พร้อม Clean & Filter คีย์สไตล์ KML ป้องกัน UI ล้น
     function updateLabelDropdownOptions(layerRecord) {
       const selectElem = document.getElementById(`sel_label_${layerRecord.id}`);
       if (!selectElem) return;
@@ -1336,7 +1368,6 @@
       selectElem.innerHTML = optionsHtml;
     }
 
-    // โครงสร้างการ์ดชั้นข้อมูลแบบ Vertical Stack Design
     function createLayerCardUI(layerRecord, leafletLayer) {
       const card = document.createElement('div');
       card.className = 'layer-card p-3.5 bg-slate-50 border border-slate-200/80 rounded-2xl space-y-2.5 text-xs sm:text-sm shadow-sm hover:shadow-md transition';
@@ -1347,7 +1378,6 @@
       const showFill = st.showFill !== false;
 
       card.innerHTML = `
-        <!-- บรรทัดที่ 1: สวิตช์ เปิด/ปิด + ชื่อชั้นข้อมูลแบบเต็ม (สูงสุด 2 บรรทัด) -->
         <div class="flex items-start gap-2.5">
           <label class="ios-switch shrink-0 mt-0.5">
             <input type="checkbox" id="chk_${layerRecord.id}" ${layerRecord.visible ? 'checked' : ''}>
@@ -1356,7 +1386,6 @@
           <span class="layer-name font-bold text-slate-800 text-xs sm:text-sm leading-snug line-clamp-2 flex-1 cursor-pointer" id="name_${layerRecord.id}" title="${layerRecord.name}">${layerRecord.name}</span>
         </div>
 
-        <!-- บรรทัดที่ 2: Badge ประเภทไฟล์ (ทางซ้าย) + ปุ่มไอคอนจัดการทั้งหมด (ทางขวา) -->
         <div class="flex items-center justify-between gap-2 pt-1 border-t border-slate-100/80">
           <span class="px-2 py-0.5 bg-brand-100 text-brand-700 font-bold rounded-full text-[10px] shrink-0">${layerRecord.type}</span>
           <div class="flex items-center gap-1 shrink-0">
@@ -1368,14 +1397,12 @@
           </div>
         </div>
 
-        <!-- บรรทัดที่ 3: แถบปรับความโปร่งแสง -->
         <div class="flex items-center gap-2 text-slate-500 font-medium pt-0.5">
           <span class="text-xs">ความโปร่งแสง</span>
           <input type="range" id="sld_${layerRecord.id}" min="0" max="100" value="${(st.opacity ?? 1.0) * 100}" class="flex-1 accent-brand-600">
           <span id="lbl_${layerRecord.id}" class="text-xs font-bold text-slate-700 min-w-[32px] text-right">${Math.round((st.opacity ?? 1.0) * 100)}%</span>
         </div>
 
-        <!-- แผงปรับแต่งสไตล์เพิ่มเติม (Style Panel) -->
         <div class="style-panel hidden pt-2.5 border-t border-slate-200 space-y-2.5" id="pnl_${layerRecord.id}">
           <div class="flex items-center justify-between">
             <label class="text-slate-600 font-medium">แสดงข้อความ</label>
@@ -1405,7 +1432,6 @@
       `;
 
       document.getElementById('uploaded-layers-list').prepend(card);
-
       updateLabelDropdownOptions(layerRecord);
 
       const chk = card.querySelector(`#chk_${layerRecord.id}`);
@@ -1418,7 +1444,6 @@
       const btnEditName = card.querySelector(`#editname_${layerRecord.id}`);
       const pnlStyle = card.querySelector(`#pnl_${layerRecord.id}`);
 
-      // ปรับปรุงสวิตช์ Toggle: เมื่อสลับสถานะ ให้เพิ่มการซิงก์อัปเดตลง Google Drive ทันทีเพื่อให้ทุกคนเห็นสถานะค้างไว้ตรงกัน
       chk.addEventListener('change', async (e) => {
         layerRecord.visible = e.target.checked;
         if (layerRecord.visible) map.addLayer(leafletLayer);
@@ -1777,16 +1802,11 @@
             createLayerCardUI(layerMeta, clusterGroup);
           });
 
-          // ปิด Loading Overlay ทันทีเพื่อความเร็ว
           document.getElementById('loading-overlay').style.display = 'none';
 
-          let loadedCount = 0;
-
-          // ดึงพิกัดเรขาคณิตแบบ Asynchronous ในพื้นหลัง
           metadataList.forEach(async (layerMeta) => {
             try {
               const geoRes = await apiFetch({ action: 'getSingleLayer', layerId: layerMeta.id });
-              loadedCount++;
               if (geoRes.success) {
                 const layerObj = runtimeLayers.get(geoRes.layerId);
                 if (layerObj) {
@@ -1794,7 +1814,6 @@
                   layerObj.loaded = true;
 
                   updateLabelDropdownOptions(layerObj.record);
-
                   attachGeoJSONToCluster(layerObj.record, geoRes.geoJSON, layerObj.leafletLayer);
                 }
               }
