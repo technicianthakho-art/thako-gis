@@ -1418,11 +1418,21 @@
       const btnEditName = card.querySelector(`#editname_${layerRecord.id}`);
       const pnlStyle = card.querySelector(`#pnl_${layerRecord.id}`);
 
-      chk.addEventListener('change', (e) => {
+      // ปรับปรุงสวิตช์ Toggle: เมื่อสลับสถานะ ให้เพิ่มการซิงก์อัปเดตลง Google Drive ทันทีเพื่อให้ทุกคนเห็นสถานะค้างไว้ตรงกัน
+      chk.addEventListener('change', async (e) => {
         layerRecord.visible = e.target.checked;
         if (layerRecord.visible) map.addLayer(leafletLayer);
         else map.removeLayer(leafletLayer);
-        persistToDrive(layerRecord);
+
+        try {
+          await apiFetch(null, 'POST', { action: 'updateVisibility', layerId: layerRecord.id, visible: layerRecord.visible });
+        } catch (err) {
+          console.error("Auto sync visibility error", err);
+        }
+
+        if (isAdminLoggedIn) {
+          persistToDrive(layerRecord);
+        }
       });
 
       if (btnDownload) {
