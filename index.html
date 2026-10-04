@@ -22,14 +22,14 @@
               50: '#f5f3ff', 100: '#ede9fe', 500: '#6366f1', 600: '#4f46e5', 700: '#4338ca', 900: '#312e81',
             }
           },
-          fontFamily: { prompt: ['Prompt', 'sans-serif'] }
+          fontFamily: { sarabun: ['Sarabun', 'sans-serif'] }
         }
       }
     }
   </script>
 
-  <!-- Google Fonts: Prompt -->
-  <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <!-- Google Fonts: Sarabun (ฟอนต์มีหัว อ่านง่าย เหมาะกับงานราชการ) -->
+  <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 
   <!-- Leaflet CSS & JS -->
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
@@ -53,7 +53,7 @@
   <script src="https://unpkg.com/lucide@latest"></script>
 
   <style>
-    * { box-sizing: border-box; font-family: 'Prompt', -apple-system, sans-serif; -webkit-tap-highlight-color: transparent; }
+    * { box-sizing: border-box; font-family: 'Sarabun', -apple-system, sans-serif; -webkit-tap-highlight-color: transparent; }
     body, html { height: 100%; width: 100%; overflow: hidden; }
 
     /* Frosted Glass Modern Styling */
@@ -102,7 +102,7 @@
       backdrop-filter: blur(12px);
       padding: 8px 16px;
       border-radius: 20px;
-      font-size: 0.72rem;
+      font-size: 0.8rem;
       color: #0f172a;
       box-shadow: 0 10px 25px -5px rgba(15, 23, 42, 0.12);
       border: 1px solid rgba(255, 255, 255, 0.8);
@@ -132,24 +132,24 @@
       border: 1px solid #4f46e5;
       border-radius: 8px;
       color: #1e3a8a;
-      font-weight: 600;
-      font-size: 11px;
+      font-weight: 700;
+      font-size: 12px;
       padding: 4px 10px;
       box-shadow: 0 4px 12px rgba(0,0,0,0.1);
     }
 
     /* Pop-up UI แบบ Soft Capsule Design */
     .leaflet-popup-content-wrapper { border-radius: 24px !important; padding: 0 !important; overflow: hidden; box-shadow: 0 25px 35px -10px rgba(15, 23, 42, 0.35) !important; border: 1px solid rgba(255, 255, 255, 0.9); }
-    .leaflet-popup-content { margin: 0 !important; width: 340px !important; max-width: 85vw !important; font-size: 0.8rem; }
-    .popup-header { background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%); color: #ffffff; padding: 12px 16px; font-weight: 700; font-size: 0.85rem; display: flex; align-items: center; justify-content: space-between; }
+    .leaflet-popup-content { margin: 0 !important; width: 340px !important; max-width: 85vw !important; font-size: 0.88rem; }
+    .popup-header { background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%); color: #ffffff; padding: 12px 16px; font-weight: 700; font-size: 0.9rem; display: flex; align-items: center; justify-content: space-between; }
     .popup-container { max-height: 280px; overflow-y: auto; padding: 12px 14px; background: #f8fafc; }
     
     .prop-row { display: flex; align-items: center; justify-content: space-between; gap: 8px; background: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px; padding: 8px 12px; margin-bottom: 6px; box-shadow: 0 1px 3px rgba(0,0,0,0.02); }
-    .prop-key-inline { font-weight: 700; color: #475569; font-size: 0.73rem; text-transform: uppercase; letter-spacing: 0.02em; min-width: 32%; max-width: 40%; word-break: break-word; flex-shrink: 0; }
-    .prop-val-inline { color: #0f172a; font-size: 0.8rem; font-weight: 600; text-align: right; word-break: break-word; flex: 1 1 auto; }
-    .popup-container input { width: 100%; padding: 4px 10px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 0.78rem; background: #ffffff; font-weight: 500; text-align: right; }
+    .prop-key-inline { font-weight: 700; color: #475569; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.02em; min-width: 32%; max-width: 40%; word-break: break-word; flex-shrink: 0; }
+    .prop-val-inline { color: #0f172a; font-size: 0.88rem; font-weight: 600; text-align: right; word-break: break-word; flex: 1 1 auto; }
+    .popup-container input { width: 100%; padding: 4px 10px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 0.85rem; background: #ffffff; font-weight: 500; text-align: right; }
     .popup-container input:focus { outline: none; border-color: #6366f1; }
-    .btn-popup-save { background: #10b981; color: white; border: none; padding: 10px; border-radius: 12px; font-size: 0.8rem; font-weight: 700; width: 100%; margin-top: 6px; cursor: pointer; transition: all 0.2s; box-shadow: 0 4px 12px rgba(16, 185, 129, 0.25); }
+    .btn-popup-save { background: #10b981; color: white; border: none; padding: 10px; border-radius: 12px; font-size: 0.85rem; font-weight: 700; width: 100%; margin-top: 6px; cursor: pointer; transition: all 0.2s; box-shadow: 0 4px 12px rgba(16, 185, 129, 0.25); }
     .btn-popup-save:hover { background: #059669; }
 
     /* iOS Style Toggle Switch สำหรับ Sidebar */
@@ -164,7 +164,7 @@
 <body class="h-full overflow-hidden bg-slate-900 text-slate-800">
 
   <!-- Loading Overlay -->
-  <div id="loading-overlay" class="fixed inset-0 bg-slate-900/60 backdrop-blur-md z-[9999] text-white flex flex-col items-center justify-center gap-3 text-sm font-semibold">
+  <div id="loading-overlay" class="fixed inset-0 bg-slate-900/60 backdrop-blur-md z-[9999] text-white flex flex-col items-center justify-center gap-3 text-base font-semibold">
     <div class="w-12 h-12 border-4 border-white/20 border-t-brand-500 rounded-full animate-spin"></div>
     <span id="loading-text">⏳ กำลังโหลดระบบแผนที่...</span>
   </div>
@@ -181,51 +181,51 @@
       <div class="p-2 bg-brand-600 text-white rounded-full shadow-md">
         <i data-lucide="map-pin" class="w-4 h-4"></i>
       </div>
-      <h1 id="gis-title" class="font-bold text-slate-900 text-sm sm:text-base leading-none">📍 GIS กองช่าง อบต.ท่าก๊อ</h1>
+      <h1 id="gis-title" class="font-bold text-slate-900 text-base sm:text-lg leading-none">📍 GIS กองช่าง อบต.ท่าก๊อ</h1>
     </div>
 
     <div class="glass-card rounded-full p-1.5 shadow-2xl pointer-events-auto flex items-center gap-2 flex-wrap">
       <div class="relative group flex items-center">
-        <button id="btn-header-highway" onclick="openHighwayApp()" class="py-2 px-4 bg-emerald-600 hover:bg-emerald-700 text-white rounded-full text-xs font-bold shadow-md transition-all transform hover:scale-105 flex items-center gap-1.5">
+        <button id="btn-header-highway" onclick="openHighwayApp()" class="py-2 px-4 bg-emerald-600 hover:bg-emerald-700 text-white rounded-full text-xs sm:text-sm font-bold shadow-md transition-all transform hover:scale-105 flex items-center gap-1.5">
           <i data-lucide="map" class="w-4 h-4"></i>
           <span>🛣 ทางหลวงท้องถิ่น</span>
         </button>
-        <span class="absolute top-full mt-2 left-1/2 -translate-x-1/2 whitespace-nowrap bg-slate-900/90 backdrop-blur-sm text-white text-[11px] font-medium px-2.5 py-1 rounded-lg shadow-xl opacity-0 pointer-events-none transition-all duration-150 group-hover:opacity-100 z-[1010]">เปิดฐานข้อมูลทางหลวงท้องถิ่น</span>
+        <span class="absolute top-full mt-2 left-1/2 -translate-x-1/2 whitespace-nowrap bg-slate-900/90 backdrop-blur-sm text-white text-xs font-medium px-2.5 py-1 rounded-lg shadow-xl opacity-0 pointer-events-none transition-all duration-150 group-hover:opacity-100 z-[1010]">เปิดฐานข้อมูลทางหลวงท้องถิ่น</span>
       </div>
 
       <div class="relative group flex items-center">
-        <button id="btn-header-convert" class="py-2 px-4 bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 text-white rounded-full text-xs font-bold shadow-md transition-all transform hover:scale-105 flex items-center gap-1.5">
+        <button id="btn-header-convert" class="py-2 px-4 bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 text-white rounded-full text-xs sm:text-sm font-bold shadow-md transition-all transform hover:scale-105 flex items-center gap-1.5">
           <i data-lucide="repeat" class="w-4 h-4"></i>
           <span>🔄 แปลงพิกัด</span>
         </button>
-        <span class="absolute top-full mt-2 left-1/2 -translate-x-1/2 whitespace-nowrap bg-slate-900/90 backdrop-blur-sm text-white text-[11px] font-medium px-2.5 py-1 rounded-lg shadow-xl opacity-0 pointer-events-none transition-all duration-150 group-hover:opacity-100 z-[1010]">แปลงค่าพิกัด GIS</span>
+        <span class="absolute top-full mt-2 left-1/2 -translate-x-1/2 whitespace-nowrap bg-slate-900/90 backdrop-blur-sm text-white text-xs font-medium px-2.5 py-1 rounded-lg shadow-xl opacity-0 pointer-events-none transition-all duration-150 group-hover:opacity-100 z-[1010]">แปลงค่าพิกัด GIS</span>
       </div>
 
       <div class="relative group flex items-center">
-        <button id="btn-header-locate" class="p-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-full text-xs font-semibold transition-all transform hover:scale-105">
+        <button id="btn-header-locate" class="p-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-full text-xs sm:text-sm font-semibold transition-all transform hover:scale-105">
           <i data-lucide="crosshair" class="w-4 h-4 text-brand-600"></i>
         </button>
-        <span class="absolute top-full mt-2 left-1/2 -translate-x-1/2 whitespace-nowrap bg-slate-900/90 backdrop-blur-sm text-white text-[11px] font-medium px-2.5 py-1 rounded-lg shadow-xl opacity-0 pointer-events-none transition-all duration-150 group-hover:opacity-100 z-[1010]">ตำแหน่งปัจจุบัน (GPS)</span>
+        <span class="absolute top-full mt-2 left-1/2 -translate-x-1/2 whitespace-nowrap bg-slate-900/90 backdrop-blur-sm text-white text-xs font-medium px-2.5 py-1 rounded-lg shadow-xl opacity-0 pointer-events-none transition-all duration-150 group-hover:opacity-100 z-[1010]">ตำแหน่งปัจจุบัน (GPS)</span>
       </div>
 
       <div class="relative group flex items-center">
-        <label id="upload-label" class="py-2 px-4 bg-slate-200 text-slate-400 rounded-full text-xs font-semibold cursor-not-allowed transition-all flex items-center gap-1.5">
+        <label id="upload-label" class="py-2 px-4 bg-slate-200 text-slate-400 rounded-full text-xs sm:text-sm font-semibold cursor-not-allowed transition-all flex items-center gap-1.5">
           <i data-lucide="upload-cloud" class="w-4 h-4"></i>
           <span class="hidden sm:inline">อัปโหลด</span>
           <input type="file" id="file-input" accept=".geojson, .json, .kml, .kmz, .zip" disabled class="hidden" />
         </label>
-        <span class="absolute top-full mt-2 left-1/2 -translate-x-1/2 whitespace-nowrap bg-slate-900/90 backdrop-blur-sm text-white text-[11px] font-medium px-2.5 py-1 rounded-lg shadow-xl opacity-0 pointer-events-none transition-all duration-150 group-hover:opacity-100 z-[1010]">อัปโหลดไฟล์ (ต้องเข้าสู่ระบบ Admin)</span>
+        <span class="absolute top-full mt-2 left-1/2 -translate-x-1/2 whitespace-nowrap bg-slate-900/90 backdrop-blur-sm text-white text-xs font-medium px-2.5 py-1 rounded-lg shadow-xl opacity-0 pointer-events-none transition-all duration-150 group-hover:opacity-100 z-[1010]">อัปโหลดไฟล์ (ต้องเข้าสู่ระบบ Admin)</span>
       </div>
 
       <div class="relative group flex items-center">
-        <button id="btn-toggle-sidebar" class="py-2 px-4 bg-slate-900 text-white rounded-full hover:bg-slate-800 transition-all transform hover:scale-105 shadow-md flex items-center gap-1.5 text-xs font-semibold">
+        <button id="btn-toggle-sidebar" class="py-2 px-4 bg-slate-900 text-white rounded-full hover:bg-slate-800 transition-all transform hover:scale-105 shadow-md flex items-center gap-1.5 text-xs sm:text-sm font-semibold">
           <i data-lucide="layers" class="w-4 h-4"></i>
           <span>รายการชั้นข้อมูล</span>
         </button>
-        <span class="absolute top-full mt-2 left-1/2 -translate-x-1/2 whitespace-nowrap bg-slate-900/90 backdrop-blur-sm text-white text-[11px] font-medium px-2.5 py-1 rounded-lg shadow-xl opacity-0 pointer-events-none transition-all duration-150 group-hover:opacity-100 z-[1010]">เปิด/ปิด รายการชั้นข้อมูล</span>
+        <span class="absolute top-full mt-2 left-1/2 -translate-x-1/2 whitespace-nowrap bg-slate-900/90 backdrop-blur-sm text-white text-xs font-medium px-2.5 py-1 rounded-lg shadow-xl opacity-0 pointer-events-none transition-all duration-150 group-hover:opacity-100 z-[1010]">เปิด/ปิด รายการชั้นข้อมูล</span>
       </div>
 
-      <button id="btn-login" class="py-2 px-4 bg-slate-900 hover:bg-slate-800 text-white rounded-full text-xs font-semibold shadow-md transition-all transform hover:scale-105 flex items-center gap-1.5">
+      <button id="btn-login" class="py-2 px-4 bg-slate-900 hover:bg-slate-800 text-white rounded-full text-xs sm:text-sm font-semibold shadow-md transition-all transform hover:scale-105 flex items-center gap-1.5">
         <i data-lucide="key" class="w-4 h-4"></i>
         <span id="login-text">Admin</span>
       </button>
@@ -241,7 +241,7 @@
         <button id="btn-tool-coord" class="p-3 text-slate-700 hover:bg-white hover:text-brand-600 rounded-full transition-all transform hover:scale-110 shadow-sm flex items-center justify-center">
           <i data-lucide="map-pin" class="w-5 h-5"></i>
         </button>
-        <span class="absolute right-full mr-3 whitespace-nowrap bg-slate-900/90 backdrop-blur-sm text-white text-[11px] font-medium px-3 py-1.5 rounded-xl shadow-2xl opacity-0 pointer-events-none transition-all duration-150 group-hover:opacity-100 z-[1010]">
+        <span class="absolute right-full mr-3 whitespace-nowrap bg-slate-900/90 backdrop-blur-sm text-white text-xs font-medium px-3 py-1.5 rounded-xl shadow-2xl opacity-0 pointer-events-none transition-all duration-150 group-hover:opacity-100 z-[1010]">
           ปักพิกัดตำแหน่ง
         </span>
       </div>
@@ -251,7 +251,7 @@
         <button id="btn-tool-measure" class="p-3 text-slate-700 hover:bg-white hover:text-brand-600 rounded-full transition-all transform hover:scale-110 shadow-sm flex items-center justify-center">
           <i data-lucide="ruler" class="w-5 h-5"></i>
         </button>
-        <span class="absolute right-full mr-3 whitespace-nowrap bg-slate-900/90 backdrop-blur-sm text-white text-[11px] font-medium px-3 py-1.5 rounded-xl shadow-2xl opacity-0 pointer-events-none transition-all duration-150 group-hover:opacity-100 z-[1010]">
+        <span class="absolute right-full mr-3 whitespace-nowrap bg-slate-900/90 backdrop-blur-sm text-white text-xs font-medium px-3 py-1.5 rounded-xl shadow-2xl opacity-0 pointer-events-none transition-all duration-150 group-hover:opacity-100 z-[1010]">
           วัดระยะทาง
         </span>
       </div>
@@ -261,7 +261,7 @@
         <button id="btn-tool-area" class="p-3 text-slate-700 hover:bg-white hover:text-brand-600 rounded-full transition-all transform hover:scale-110 shadow-sm flex items-center justify-center">
           <i data-lucide="pentagon" class="w-5 h-5"></i>
         </button>
-        <span class="absolute right-full mr-3 whitespace-nowrap bg-slate-900/90 backdrop-blur-sm text-white text-[11px] font-medium px-3 py-1.5 rounded-xl shadow-2xl opacity-0 pointer-events-none transition-all duration-150 group-hover:opacity-100 z-[1010]">
+        <span class="absolute right-full mr-3 whitespace-nowrap bg-slate-900/90 backdrop-blur-sm text-white text-xs font-medium px-3 py-1.5 rounded-xl shadow-2xl opacity-0 pointer-events-none transition-all duration-150 group-hover:opacity-100 z-[1010]">
           คำนวณพื้นที่
         </span>
       </div>
@@ -271,7 +271,7 @@
         <button id="btn-tool-export" class="p-3 text-emerald-600 hover:bg-emerald-50 rounded-full transition-all transform hover:scale-110 shadow-sm flex items-center justify-center">
           <i data-lucide="download" class="w-5 h-5"></i>
         </button>
-        <span class="absolute right-full mr-3 whitespace-nowrap bg-slate-900/90 backdrop-blur-sm text-white text-[11px] font-medium px-3 py-1.5 rounded-xl shadow-2xl opacity-0 pointer-events-none transition-all duration-150 group-hover:opacity-100 z-[1010]">
+        <span class="absolute right-full mr-3 whitespace-nowrap bg-slate-900/90 backdrop-blur-sm text-white text-xs font-medium px-3 py-1.5 rounded-xl shadow-2xl opacity-0 pointer-events-none transition-all duration-150 group-hover:opacity-100 z-[1010]">
           ดาวน์โหลด GeoJSON ชั่วคราว
         </span>
       </div>
@@ -281,7 +281,7 @@
         <button id="btn-tool-save-layer" class="p-3 text-indigo-600 hover:bg-indigo-50 rounded-full transition-all transform hover:scale-110 shadow-sm flex items-center justify-center">
           <i data-lucide="save" class="w-5 h-5"></i>
         </button>
-        <span class="absolute right-full mr-3 whitespace-nowrap bg-slate-900/90 backdrop-blur-sm text-white text-[11px] font-medium px-3 py-1.5 rounded-xl shadow-2xl opacity-0 pointer-events-none transition-all duration-150 group-hover:opacity-100 z-[1010]">
+        <span class="absolute right-full mr-3 whitespace-nowrap bg-slate-900/90 backdrop-blur-sm text-white text-xs font-medium px-3 py-1.5 rounded-xl shadow-2xl opacity-0 pointer-events-none transition-all duration-150 group-hover:opacity-100 z-[1010]">
           จัดเก็บลง Google Drive
         </span>
       </div>
@@ -291,7 +291,7 @@
         <button id="btn-tool-clear" class="p-3 text-red-500 hover:bg-red-50 rounded-full transition-all transform hover:scale-110 shadow-sm flex items-center justify-center">
           <i data-lucide="trash-2" class="w-5 h-5"></i>
         </button>
-        <span class="absolute right-full mr-3 whitespace-nowrap bg-slate-900/90 backdrop-blur-sm text-white text-[11px] font-medium px-3 py-1.5 rounded-xl shadow-2xl opacity-0 pointer-events-none transition-all duration-150 group-hover:opacity-100 z-[1010]">
+        <span class="absolute right-full mr-3 whitespace-nowrap bg-slate-900/90 backdrop-blur-sm text-white text-xs font-medium px-3 py-1.5 rounded-xl shadow-2xl opacity-0 pointer-events-none transition-all duration-150 group-hover:opacity-100 z-[1010]">
           ล้างหมุด/รูปวาดชั่วคราว
         </span>
       </div>
@@ -308,13 +308,13 @@
     
     <div class="flex-1 overflow-y-auto p-4 space-y-4">
       <div>
-        <div class="text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-2">Google Drive Layers</div>
+        <div class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Google Drive Layers</div>
         <div id="uploaded-layers-list" class="space-y-2.5"></div>
       </div>
 
       <div class="pt-4 border-t border-slate-100">
-        <div class="text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-2">🗺️ แผนที่ฐาน (Base Maps)</div>
-        <div class="space-y-1.5 text-xs text-slate-700 font-medium">
+        <div class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">🗺️ แผนที่ฐาน (Base Maps)</div>
+        <div class="space-y-1.5 text-xs sm:text-sm text-slate-700 font-medium">
           <label class="flex items-center gap-2.5 p-2.5 hover:bg-slate-50 rounded-2xl cursor-pointer transition">
             <input type="radio" name="basemap" value="googleHybrid" checked class="accent-brand-600 w-4 h-4"> Google Earth (Hybrid)
           </label>
@@ -331,11 +331,11 @@
 
   <!-- SECTION 4: BOTTOM FLOATING DOCK -->
   <div id="bottom-tool-dock" class="fixed bottom-6 left-1/2 -translate-x-1/2 z-[1000] pointer-events-auto hidden transition-all duration-300">
-    <div class="glass-card rounded-3xl p-5 shadow-2xl border border-white/80 max-w-md w-[90vw] sm:w-[420px] flex flex-col gap-2.5 text-xs">
+    <div class="glass-card rounded-3xl p-5 shadow-2xl border border-white/80 max-w-md w-[90vw] sm:w-[420px] flex flex-col gap-2.5 text-xs sm:text-sm">
       <div class="flex items-center justify-between font-bold text-slate-800 border-b border-slate-200/60 pb-2">
         <span id="dock-title" class="flex items-center gap-1.5 text-brand-600">🛠️ เครื่องมือคำนวณ/แสดงผล</span>
         <div class="flex items-center gap-2">
-          <button id="btn-dock-undo" class="px-3 py-1.5 bg-amber-50 text-amber-700 hover:bg-amber-100 border border-amber-200 rounded-full text-[11px] font-bold flex items-center gap-1 transition shadow-sm" title="ย้อนกลับรายการล่าสุด">
+          <button id="btn-dock-undo" class="px-3 py-1.5 bg-amber-50 text-amber-700 hover:bg-amber-100 border border-amber-200 rounded-full text-xs font-bold flex items-center gap-1 transition shadow-sm" title="ย้อนกลับรายการล่าสุด">
             <i data-lucide="undo-2" class="w-3.5 h-3.5"></i> ย้อนกลับ
           </button>
           <button id="btn-dock-close" class="p-1 text-slate-400 hover:text-slate-600 rounded-full"><i data-lucide="x" class="w-4 h-4"></i></button>
@@ -349,8 +349,8 @@
 
   <!-- SECTION 5: MODALS -->
   <div id="modal-convert" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-[9000] flex items-center justify-center p-4 hidden">
-    <div class="glass-card rounded-3xl p-6 w-full max-w-sm shadow-2xl space-y-4 border border-white/80 text-xs">
-      <div class="flex items-center justify-between font-bold text-slate-900 text-sm border-b pb-2">
+    <div class="glass-card rounded-3xl p-6 w-full max-w-sm shadow-2xl space-y-4 border border-white/80 text-xs sm:text-sm">
+      <div class="flex items-center justify-between font-bold text-slate-900 text-sm sm:text-base border-b pb-2">
         <span class="flex items-center gap-2"><i data-lucide="repeat" class="w-4 h-4 text-brand-600"></i> แปลงค่าพิกัด GIS</span>
         <button id="close-modal-convert" class="p-1 text-slate-400 hover:text-slate-600"><i data-lucide="x" class="w-5 h-5"></i></button>
       </div>
@@ -406,8 +406,8 @@
   </div>
 
   <div id="modal-pin-coord" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-[9000] flex items-center justify-center p-4 hidden">
-    <div class="glass-card rounded-3xl p-6 w-full max-w-sm shadow-2xl space-y-3.5 border border-white/80 text-xs">
-      <div class="flex items-center justify-between font-bold text-slate-900 text-sm border-b pb-2">
+    <div class="glass-card rounded-3xl p-6 w-full max-w-sm shadow-2xl space-y-3.5 border border-white/80 text-xs sm:text-sm">
+      <div class="flex items-center justify-between font-bold text-slate-900 text-sm sm:text-base border-b pb-2">
         <span class="flex items-center gap-2"><i data-lucide="map-pin" class="w-4 h-4 text-brand-600"></i> ค้นหาและจดบันทึกพิกัด</span>
         <button id="close-modal-pin" class="p-1 text-slate-400 hover:text-slate-600"><i data-lucide="x" class="w-5 h-5"></i></button>
       </div>
@@ -458,8 +458,8 @@
 
   <!-- SECTION 6: MODAL SAVE LAYER WITH DEFAULT ATTRIBUTE TEMPLATE -->
   <div id="modal-save-layer" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-[9000] flex items-center justify-center p-4 hidden">
-    <div class="glass-card rounded-3xl p-6 w-full max-w-md shadow-2xl space-y-3.5 border border-white/80 text-xs max-h-[90vh] overflow-y-auto">
-      <div class="flex items-center justify-between font-bold text-slate-900 text-sm border-b pb-2">
+    <div class="glass-card rounded-3xl p-6 w-full max-w-md shadow-2xl space-y-3.5 border border-white/80 text-xs sm:text-sm max-h-[90vh] overflow-y-auto">
+      <div class="flex items-center justify-between font-bold text-slate-900 text-sm sm:text-base border-b pb-2">
         <span class="flex items-center gap-2"><i data-lucide="save" class="w-4 h-4 text-brand-600"></i> บันทึกชั้นข้อมูลลง Google Drive</span>
         <button id="close-modal-save-layer" class="p-1 text-slate-400 hover:text-slate-600"><i data-lucide="x" class="w-5 h-5"></i></button>
       </div>
@@ -472,7 +472,7 @@
 
         <div class="p-3 bg-brand-50/60 border border-brand-100 rounded-2xl space-y-2 text-brand-900">
           <div class="font-bold flex items-center gap-1"><i data-lucide="info" class="w-3.5 h-3.5"></i> คุณลักษณะมาตรฐาน (กองช่าง อบต.ท่าก๊อ)</div>
-          <div class="text-[11px] text-slate-600 leading-relaxed">กรอกข้อมูลเฉพาะช่องที่ต้องการ ไม่บังคับกรอกทุกช่อง</div>
+          <div class="text-xs text-slate-600 leading-relaxed">กรอกข้อมูลเฉพาะช่องที่ต้องการ ไม่บังคับกรอกทุกช่อง</div>
         </div>
 
         <div id="save-template-fields" class="space-y-2.5">
@@ -490,16 +490,16 @@
   <!-- SECTION 7: ADMIN LOGIN MODAL -->
   <div id="modal-admin-login" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-[9000] flex items-center justify-center p-4 hidden">
     <div class="glass-card rounded-3xl p-6 w-full max-w-sm shadow-2xl space-y-4 border border-white/80">
-      <div class="flex items-center justify-between font-bold text-slate-900 text-sm border-b pb-2">
+      <div class="flex items-center justify-between font-bold text-slate-900 text-sm sm:text-base border-b pb-2">
         <span class="flex items-center gap-2"><i data-lucide="key" class="w-4 h-4 text-brand-600"></i> เข้าสู่ระบบ Admin</span>
         <button id="close-modal-login" class="p-1 text-slate-400 hover:text-slate-600"><i data-lucide="x" class="w-5 h-5"></i></button>
       </div>
       <div class="space-y-3">
         <div>
-          <label class="block text-xs font-semibold text-slate-600 mb-1">รหัสผ่านระบบ</label>
-          <input type="password" id="admin-pass-input" placeholder="กรอกรหัสผ่าน Admin..." class="w-full p-3 bg-white border border-slate-200 rounded-2xl text-xs outline-none focus:ring-2 focus:ring-brand-500" />
+          <label class="block text-xs sm:text-sm font-semibold text-slate-600 mb-1">รหัสผ่านระบบ</label>
+          <input type="password" id="admin-pass-input" placeholder="กรอกรหัสผ่าน Admin..." class="w-full p-3 bg-white border border-slate-200 rounded-2xl text-xs sm:text-sm outline-none focus:ring-2 focus:ring-brand-500" />
         </div>
-        <button id="btn-submit-login" class="w-full py-2.5 bg-brand-600 hover:bg-brand-700 text-white rounded-2xl text-xs font-bold shadow-md transition">เข้าสู่ระบบ</button>
+        <button id="btn-submit-login" class="w-full py-2.5 bg-brand-600 hover:bg-brand-700 text-white rounded-2xl text-xs sm:text-sm font-bold shadow-md transition">เข้าสู่ระบบ</button>
       </div>
     </div>
   </div>
@@ -559,7 +559,7 @@
       const box = document.getElementById('toast-container');
       const toast = document.createElement('div');
       const bg = type === 'success' ? 'bg-emerald-600' : type === 'error' ? 'bg-red-600' : 'bg-slate-900';
-      toast.className = `glass-card ${bg} text-white text-xs font-semibold px-4 py-2.5 rounded-2xl shadow-xl pointer-events-auto transition-all duration-300 transform translate-y-2 opacity-0`;
+      toast.className = `glass-card ${bg} text-white text-xs sm:text-sm font-semibold px-4 py-2.5 rounded-2xl shadow-xl pointer-events-auto transition-all duration-300 transform translate-y-2 opacity-0`;
       toast.textContent = msg;
       box.appendChild(toast);
       setTimeout(() => { toast.classList.remove('translate-y-2', 'opacity-0'); }, 10);
@@ -585,13 +585,13 @@
     function applyAdminState() {
       if (isAdminLoggedIn) {
         loginText.textContent = 'Log out';
-        btnLogin.className = 'py-2 px-4 bg-red-600 hover:bg-red-700 text-white rounded-full text-xs font-semibold shadow-md transition-all transform hover:scale-105 flex items-center gap-1.5';
-        uploadLabel.className = 'py-2 px-4 bg-brand-600 hover:bg-brand-700 text-white rounded-full text-xs font-semibold shadow-md cursor-pointer transition-all transform hover:scale-105 flex items-center gap-1.5';
+        btnLogin.className = 'py-2 px-4 bg-red-600 hover:bg-red-700 text-white rounded-full text-xs sm:text-sm font-semibold shadow-md transition-all transform hover:scale-105 flex items-center gap-1.5';
+        uploadLabel.className = 'py-2 px-4 bg-brand-600 hover:bg-brand-700 text-white rounded-full text-xs sm:text-sm font-semibold shadow-md cursor-pointer transition-all transform hover:scale-105 flex items-center gap-1.5';
         fileInput.disabled = false;
       } else {
         loginText.textContent = 'Admin';
-        btnLogin.className = 'py-2 px-4 bg-slate-900 hover:bg-slate-800 text-white rounded-full text-xs font-semibold shadow-md transition-all transform hover:scale-105 flex items-center gap-1.5';
-        uploadLabel.className = 'py-2 px-4 bg-slate-200 text-slate-400 rounded-full text-xs font-semibold cursor-not-allowed transition-all flex items-center gap-1.5';
+        btnLogin.className = 'py-2 px-4 bg-slate-900 hover:bg-slate-800 text-white rounded-full text-xs sm:text-sm font-semibold shadow-md transition-all transform hover:scale-105 flex items-center gap-1.5';
+        uploadLabel.className = 'py-2 px-4 bg-slate-200 text-slate-400 rounded-full text-xs sm:text-sm font-semibold cursor-not-allowed transition-all flex items-center gap-1.5';
         fileInput.disabled = true;
       }
       refreshUIState();
@@ -733,14 +733,14 @@
           }).addTo(map);
 
           userLocationMarker.bindPopup(`
-            <div style="font-size:0.82rem; line-height:1.6; padding: 2px;">
-              <b style="color:#2563eb; font-size:0.88rem;">📍 ตำแหน่งปัจจุบันของคุณ</b><br>
+            <div style="font-size:0.88rem; line-height:1.6; padding: 2px;">
+              <b style="color:#2563eb; font-size:0.95rem;">📍 ตำแหน่งปัจจุบันของคุณ</b><br>
               <b>Lat:</b> ${latitude.toFixed(6)}<br>
               <b>Lon:</b> ${longitude.toFixed(6)}<br>
               <b>UTM Zone ${zone}N:</b><br>
               • Easting (E): ${Math.round(utm[0]).toLocaleString()} m<br>
               • Northing (N): ${Math.round(utm[1]).toLocaleString()} m<br>
-              <span style="color:#64748b; font-size:0.75rem;">ความแม่นยำ: ±${Math.round(accuracy).toLocaleString()} เมตร</span>
+              <span style="color:#64748b; font-size:0.8rem;">ความแม่นยำ: ±${Math.round(accuracy).toLocaleString()} เมตร</span>
             </div>
           `, { autoPan: true, autoPanPaddingTopLeft: [50, 150], autoPanPaddingBottomRight: [50, 50] }).openPopup();
 
@@ -952,7 +952,7 @@
 
       const marker = L.marker([lat, lon], { title: name });
       const popupContent = `
-        <div style="font-size:0.8rem; line-height:1.5;">
+        <div style="font-size:0.88rem; line-height:1.5;">
           <b style="color:#4f46e5;">📍 ${name}</b><br>
           <b>Lat:</b> ${lat.toFixed(6)} | <b>Lon:</b> ${lon.toFixed(6)}<br>
           <b>UTM Zone ${zone}N:</b> E ${Math.round(utm[0]).toLocaleString()} m, N ${Math.round(utm[1]).toLocaleString()} m
@@ -1338,7 +1338,7 @@
     // ปรับเปลี่ยนโครงสร้างการ์ดชั้นข้อมูลใหม่ (Vertical Stack Design): แยกสวิตช์+ชื่อ ไว้บรรทัดบน / Badge+ปุ่ม ไว้บรรทัดล่าง
     function createLayerCardUI(layerRecord, leafletLayer) {
       const card = document.createElement('div');
-      card.className = 'layer-card p-3.5 bg-slate-50 border border-slate-200/80 rounded-2xl space-y-2.5 text-xs shadow-sm hover:shadow-md transition';
+      card.className = 'layer-card p-3.5 bg-slate-50 border border-slate-200/80 rounded-2xl space-y-2.5 text-xs sm:text-sm shadow-sm hover:shadow-md transition';
       card.id = `card_${layerRecord.id}`;
 
       const st = layerRecord.style || {};
@@ -1352,7 +1352,7 @@
             <input type="checkbox" id="chk_${layerRecord.id}" ${layerRecord.visible ? 'checked' : ''}>
             <span class="ios-slider"></span>
           </label>
-          <span class="layer-name font-bold text-slate-800 text-xs leading-snug line-clamp-2 flex-1 cursor-pointer" id="name_${layerRecord.id}" title="${layerRecord.name}">${layerRecord.name}</span>
+          <span class="layer-name font-bold text-slate-800 text-xs sm:text-sm leading-snug line-clamp-2 flex-1 cursor-pointer" id="name_${layerRecord.id}" title="${layerRecord.name}">${layerRecord.name}</span>
         </div>
 
         <!-- บรรทัดที่ 2: Badge ประเภทไฟล์ (ทางซ้าย) + ปุ่มไอคอนจัดการทั้งหมด (ทางขวา) -->
@@ -1369,16 +1369,16 @@
 
         <!-- บรรทัดที่ 3: แถบปรับความโปร่งแสง -->
         <div class="flex items-center gap-2 text-slate-500 font-medium pt-0.5">
-          <span class="text-[11px]">ความโปร่งแสง</span>
+          <span class="text-xs">ความโปร่งแสง</span>
           <input type="range" id="sld_${layerRecord.id}" min="0" max="100" value="${(st.opacity ?? 1.0) * 100}" class="flex-1 accent-brand-600">
-          <span id="lbl_${layerRecord.id}" class="text-[11px] font-bold text-slate-700 min-w-[32px] text-right">${Math.round((st.opacity ?? 1.0) * 100)}%</span>
+          <span id="lbl_${layerRecord.id}" class="text-xs font-bold text-slate-700 min-w-[32px] text-right">${Math.round((st.opacity ?? 1.0) * 100)}%</span>
         </div>
 
         <!-- แผงปรับแต่งสไตล์เพิ่มเติม (Style Panel) -->
         <div class="style-panel hidden pt-2.5 border-t border-slate-200 space-y-2.5" id="pnl_${layerRecord.id}">
           <div class="flex items-center justify-between">
             <label class="text-slate-600 font-medium">แสดงข้อความ</label>
-            <select id="sel_label_${layerRecord.id}" class="p-1.5 bg-white border border-slate-200 rounded-xl text-[11px] font-medium text-slate-700 max-w-[180px] truncate">
+            <select id="sel_label_${layerRecord.id}" class="p-1.5 bg-white border border-slate-200 rounded-xl text-xs font-medium text-slate-700 max-w-[180px] truncate">
               <option value="">-- ไม่แสดงตัวหนังสือ --</option>
             </select>
           </div>
@@ -1386,14 +1386,14 @@
             <label class="text-slate-600 font-medium">สีเส้น</label>
             <div class="flex items-center gap-2">
               <input type="color" id="clr_stroke_${layerRecord.id}" value="${st.strokeColor || '#4f46e5'}" class="w-7 h-7 border-0 bg-transparent cursor-pointer rounded-full">
-              <label class="text-[11px]"><input type="checkbox" id="chk_no_stroke_${layerRecord.id}" ${!showStroke ? 'checked' : ''}> ซ่อน</label>
+              <label class="text-xs"><input type="checkbox" id="chk_no_stroke_${layerRecord.id}" ${!showStroke ? 'checked' : ''}> ซ่อน</label>
             </div>
           </div>
           <div class="flex items-center justify-between">
             <label class="text-slate-600 font-medium">สีพื้นหลัง</label>
             <div class="flex items-center gap-2">
               <input type="color" id="clr_fill_${layerRecord.id}" value="${st.fillColor || '#4f46e5'}" class="w-7 h-7 border-0 bg-transparent cursor-pointer rounded-full">
-              <label class="text-[11px]"><input type="checkbox" id="chk_no_fill_${layerRecord.id}" ${!showFill ? 'checked' : ''}> ซ่อน</label>
+              <label class="text-xs"><input type="checkbox" id="chk_no_fill_${layerRecord.id}" ${!showFill ? 'checked' : ''}> ซ่อน</label>
             </div>
           </div>
           <div class="flex items-center justify-between">
@@ -1626,7 +1626,7 @@
         if (detectedRoadCode) {
           html += `
             <div class="mt-2 pt-2 border-t border-slate-200">
-              <button type="button" onclick="openHighwayApp('${detectedRoadCode}')" class="w-full py-2.5 px-3 bg-emerald-600 hover:bg-emerald-700 text-white rounded-2xl text-xs font-bold shadow-md transition flex items-center justify-center gap-1.5">
+              <button type="button" onclick="openHighwayApp('${detectedRoadCode}')" class="w-full py-2.5 px-3 bg-emerald-600 hover:bg-emerald-700 text-white rounded-2xl text-xs sm:text-sm font-bold shadow-md transition flex items-center justify-center gap-1.5">
                 📊 ดูข้อมูลสายทาง / เอกสารแนบ
               </button>
             </div>
